@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aikido: El Camino de la Armonía — v0.06</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+:root{
+  --bg:#0a0a0f;--panel:#12121a;--panel2:#1a1a26;--border:#2a2a3f;
+  --accent:#c8a96e;--accent2:#7eb8c8;--ki:#a8d8b0;--hp:#e07070;
+  --text:#e8e0d0;--text-dim:#7a7a9a;--exp:#d4a0e0;
+  --opt:#a8d8b0;--good:#c8a96e;--neut:#7a7a9a;--bad:#e07070;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px 12px 32px;background-image:radial-gradient(ellipse 60% 40% at 20% 80%,rgba(126,184,200,.04) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 20%,rgba(200,169,110,.05) 0%,transparent 60%);}
+.title-bar{text-align:center;margin-bottom:10px;}
+.title-bar h1{font-family:'Noto Serif JP',serif;font-size:clamp(1rem,3vw,1.4rem);letter-spacing:.3em;color:var(--accent);text-shadow:0 0 24px rgba(200,169,110,.4);}
+.title-bar p{font-size:.65rem;letter-spacing:.2em;color:var(--text-dim);margin-top:2px;}
+.belt-row{width:100%;max-width:680px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:7px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.belt-icon{width:18px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,.15);}
+.belt-label{font-size:.7rem;letter-spacing:.15em;color:var(--accent);font-family:'Noto Serif JP',serif;flex-shrink:0;}
+.belt-kyu{font-size:.6rem;color:var(--text-dim);flex-shrink:0;}
+.exp-track{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.exp-fill{height:100%;background:linear-gradient(90deg,#b080d0,#d4a0e0);border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.exp-val{font-size:.6rem;color:var(--exp);width:72px;text-align:right;flex-shrink:0;}
+.arena{width:100%;max-width:680px;display:flex;flex-direction:column;gap:8px;}
+.fighters-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;}
+.fighter-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 12px;position:relative;overflow:hidden;}
+.fighter-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,169,110,.04) 0%,transparent 60%);pointer-events:none;}
+.fighter-card.enemy{border-color:rgba(224,112,112,.3);}
+.fighter-card.enemy::before{background:linear-gradient(225deg,rgba(224,112,112,.04) 0%,transparent 60%);}
+.fighter-name{font-family:'Noto Serif JP',serif;font-size:.8rem;letter-spacing:.15em;color:var(--accent);margin-bottom:6px;}
+.fighter-card.enemy .fighter-name{color:var(--hp);text-align:right;}
+.stat-row{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.stat-label{font-size:.58rem;letter-spacing:.1em;color:var(--text-dim);width:20px;flex-shrink:0;}
+.bar-track{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.bar-fill.hp{background:linear-gradient(90deg,#e07070,#f0a0a0);}
+.bar-fill.ki{background:linear-gradient(90deg,#7eb8a0,#a8d8b0);}
+.stat-val{font-size:.62rem;color:var(--text-dim);width:32px;text-align:right;flex-shrink:0;}
+.fighter-sprite{font-size:2.4rem;text-align:center;padding:4px 0;line-height:1;filter:drop-shadow(0 0 10px rgba(200,169,110,.3));}
+.fighter-card.enemy .fighter-sprite{filter:drop-shadow(0 0 10px rgba(224,112,112,.3));}
+.vs-badge{font-family:'Noto Serif JP',serif;font-size:.7rem;color:var(--text-dim);letter-spacing:.2em;text-align:center;}
+.status-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;}
+.tag{font-size:.52rem;padding:1px 5px;border-radius:3px;letter-spacing:.07em;}
+.tag.redirect{background:rgba(126,184,200,.2);color:var(--accent2);}
+.tag.stunned{background:rgba(224,112,112,.2);color:var(--hp);}
+.tag.arm_down{background:rgba(200,169,110,.2);color:var(--accent);}
+.stats-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.stat-chip{font-size:.58rem;padding:1px 6px;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);}
+.stat-chip span{color:var(--text);font-weight:700;}
+/* LOG */
+.log-box{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 14px 18px;min-height:76px;position:relative;cursor:pointer;user-select:none;}
+.log-box::before{content:'';position:absolute;top:0;left:14px;right:14px;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.3;}
+.log-line{font-size:.82rem;line-height:1.7;color:var(--text);}
+.log-line.dim{color:var(--text-dim);}
+.log-cursor{display:inline-block;width:7px;height:13px;background:var(--accent);margin-left:3px;vertical-align:middle;animation:blink .7s steps(1) infinite;}
+@keyframes blink{50%{opacity:0;}}
+.log-arrow{position:absolute;bottom:5px;right:12px;font-size:.62rem;color:var(--accent);opacity:0;animation:arrowBounce .6s ease infinite alternate;pointer-events:none;}
+.log-arrow.show{opacity:1;}
+@keyframes arrowBounce{from{transform:translateY(0);}to{transform:translateY(3px);}}
+.turn-indicator{font-size:.58rem;letter-spacing:.18em;color:var(--accent);margin-bottom:4px;font-family:'Noto Serif JP',serif;}
+/* ACTION PANEL */
+.action-panel{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.action-panel-header{padding:6px 14px;font-size:.6rem;letter-spacing:.18em;color:var(--text-dim);border-bottom:1px solid var(--border);background:var(--panel2);display:flex;align-items:center;justify-content:space-between;}
+.panel-phase{font-size:.55rem;color:var(--accent);letter-spacing:.12em;}
+/* SABAKI GRID */
+.sabaki-grid{display:grid;grid-template-columns:1fr 1fr;}
+.sabaki-btn{background:none;border:none;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px 14px;cursor:pointer;text-align:left;color:var(--text);transition:background .15s;position:relative;}
+.sabaki-btn:nth-child(even){border-right:none;}
+.sabaki-btn:nth-child(3),.sabaki-btn:nth-child(4){border-bottom:none;}
+.sabaki-btn:hover{background:rgba(126,184,200,.07);}
+.sabaki-btn:active{background:rgba(126,184,200,.14);}
+.sabaki-name{font-size:.82rem;font-weight:700;letter-spacing:.05em;color:var(--accent2);display:block;}
+.sabaki-jp{font-size:.68rem;color:var(--text-dim);display:block;margin-top:1px;}
+.sabaki-compat{font-size:.55rem;margin-top:4px;letter-spacing:.06em;}
+.compat-opt{color:var(--opt);}
+.compat-good{color:var(--good);}
+.compat-neut{color:var(--neut);}
+.compat-bad{color:var(--bad);}
+/* MOVE GRID */
+.moves-grid{display:grid;grid-template-columns:1fr 1fr;}
+.move-btn{background:none;border:none;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 12px;cursor:pointer;text-align:left;color:var(--text);transition:background .15s;position:relative;}
+.move-btn:nth-child(even){border-right:none;}
+.move-btn:nth-last-child(1),.move-btn:nth-last-child(2){border-bottom:none;}
+.move-btn:hover:not(:disabled){background:rgba(200,169,110,.07);}
+.move-btn:active:not(:disabled){background:rgba(200,169,110,.14);}
+.move-btn:disabled{opacity:.3;cursor:not-allowed;}
+.move-name{font-size:.76rem;font-weight:700;letter-spacing:.04em;display:block;}
+.move-meta{display:flex;gap:5px;margin-top:2px;flex-wrap:wrap;align-items:center;}
+.move-type{font-size:.52rem;letter-spacing:.07em;color:var(--text-dim);}
+.move-ki{font-size:.52rem;color:var(--ki);}
+.move-req{font-size:.5rem;color:var(--exp);}
+.move-desc{font-size:.56rem;color:var(--text-dim);margin-top:2px;line-height:1.35;}
+.compat-badge{position:absolute;top:6px;right:8px;font-size:.68rem;font-weight:700;line-height:1;}
+.compat-badge.opt{color:var(--opt);}
+.compat-badge.good{color:var(--good);}
+.compat-badge.neut{color:var(--neut);}
+.compat-badge.bad{color:var(--bad);}
+.sabaki-chosen{padding:5px 14px;font-size:.58rem;letter-spacing:.14em;color:var(--accent2);background:rgba(126,184,200,.06);border-bottom:1px solid var(--border);display:none;}
+.sabaki-chosen.show{display:block;}
+.move-btn.type-control .move-name{color:var(--accent);}
+.move-btn.type-redirect .move-name{color:var(--accent2);}
+.move-btn.type-ki .move-name{color:var(--ki);}
+.move-btn.type-throw .move-name{color:#e0b070;}
+.move-btn.type-pin .move-name{color:#c0a0e8;}
+/* BOTTOM BAR */
+.bottom-bar{display:flex;gap:6px;justify-content:flex-end;}
+.btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'Zen Kaku Gothic New',sans-serif;font-size:.68rem;letter-spacing:.08em;padding:6px 14px;cursor:pointer;transition:all .15s;}
+.btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn.primary{border-color:var(--accent);color:var(--accent);background:rgba(200,169,110,.07);}
+.btn.primary:hover{background:rgba(200,169,110,.15);}
+.flash{position:fixed;inset:0;pointer-events:none;opacity:0;background:rgba(200,169,110,.07);transition:opacity .2s;}
+.flash.active{opacity:1;}
+/* OVERLAYS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(10,10,15,.93);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
+.overlay.show{display:flex;}
+.overlay h2{font-family:'Noto Serif JP',serif;font-size:1.8rem;letter-spacing:.3em;color:var(--accent);text-shadow:0 0 32px rgba(200,169,110,.5);}
+.overlay p{color:var(--text-dim);font-size:.78rem;letter-spacing:.12em;text-align:center;max-width:320px;}
+.belt-up-box{background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:24px 32px;text-align:center;box-shadow:0 0 40px rgba(200,169,110,.2);}
+.belt-up-box .new-belt{width:60px;height:20px;border-radius:4px;margin:12px auto;border:2px solid rgba(255,255,255,.2);}
+.belt-up-box h3{font-family:'Noto Serif JP',serif;font-size:1rem;letter-spacing:.2em;color:var(--accent);}
+.belt-up-box .unlocked{font-size:.68rem;color:var(--exp);margin-top:10px;letter-spacing:.08em;line-height:1.6;}
+.tree-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,15,.96);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+.tree-overlay.show{display:flex;}
+.tree-box{width:100%;max-width:660px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.tree-box h2{font-family:'Noto Serif JP',serif;font-size:1rem;letter-spacing:.2em;color:var(--accent);margin-bottom:14px;}
+.tree-belt{margin-bottom:14px;border-left:2px solid var(--border);padding-left:12px;}
+.tree-belt-label{font-size:.62rem;letter-spacing:.15em;color:var(--text-dim);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.tree-belt-dot{width:12px;height:7px;border-radius:2px;flex-shrink:0;}
+.tree-techs{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.tree-tech{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;}
+.tree-tech.unlocked{border-color:rgba(200,169,110,.4);}
+.tree-tech-name{font-size:.74rem;font-weight:700;color:var(--text-dim);}
+.tree-tech.unlocked .tree-tech-name{color:var(--text);}
+.tree-tech-desc{font-size:.57rem;color:var(--text-dim);margin-top:2px;line-height:1.35;}
+.tree-tech-badge{font-size:.52rem;margin-top:3px;}
+.tree-tech-badge.u{color:var(--ki);}
+.tree-tech-badge.l{color:var(--exp);}
+.compat-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:.52rem;}
+.compat-table th{color:var(--text-dim);font-weight:400;padding:2px 4px;text-align:center;letter-spacing:.06em;}
+.compat-table td{text-align:center;padding:2px 4px;}
+/* waiting panel */
+.waiting-msg{padding:14px;font-size:.72rem;color:var(--text-dim);text-align:center;letter-spacing:.12em;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .35s ease;}
+@keyframes levelUp{0%{transform:scale(1);box-shadow:none;}50%{transform:scale(1.03);box-shadow:0 0 20px rgba(200,169,110,.4);}100%{transform:scale(1);box-shadow:none;}}
+.level-up{animation:levelUp .6s ease;}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div class="title-bar">
+  <h1>合気道 · AIKIDO</h1>
+  <p>EL CAMINO DE LA ARMONÍA &nbsp;·&nbsp; <span style="color:var(--accent);opacity:.6;">v0.06</span></p>
+</div>
+<div class="belt-row">
+  <div class="belt-icon" id="belt-icon"></div>
+  <span class="belt-label" id="belt-label">7º KYU</span>
+  <span class="belt-kyu" id="belt-kyu">BLANCO</span>
+  <div class="exp-track"><div class="exp-fill" id="exp-fill" style="width:0%"></div></div>
+  <span class="exp-val" id="exp-val">0 / 60 EXP</span>
+</div>
+<div class="arena">
+  <div class="fighters-row">
+    <div class="fighter-card" id="card-player">
+      <div class="fighter-name">TAKESHI</div>
+      <div class="fighter-sprite">🥋</div>
+      <div class="stat-row"><span class="stat-label">HP</span><div class="bar-track"><div class="bar-fill hp" id="bar-player-hp" style="width:100%"></div></div><span class="stat-val" id="val-player-hp">80/80</span></div>
+      <div class="stat-row"><span class="stat-label">KI</span><div class="bar-track"><div class="bar-fill ki" id="bar-player-ki" style="width:100%"></div></div><span class="stat-val" id="val-player-ki">50/50</span></div>
+      <div class="stats-row"><div class="stat-chip">ATQ <span id="chip-atq">18</span></div><div class="stat-chip">ARM <span id="chip-arm">22</span></div></div>
+      <div class="status-tags" id="tags-player"></div>
+    </div>
+    <div class="vs-badge">VS</div>
+    <div class="fighter-card enemy" id="card-enemy">
+      <div class="fighter-name" id="enemy-name">KENZAN</div>
+      <div class="fighter-sprite" id="enemy-sprite">👤</div>
+      <div class="stat-row"><span class="stat-label">HP</span><div class="bar-track"><div class="bar-fill hp" id="bar-enemy-hp" style="width:100%"></div></div><span class="stat-val" id="val-enemy-hp">90/90</span></div>
+      <div class="stat-row"><span class="stat-label">KI</span><div class="bar-track"><div class="bar-fill ki" id="bar-enemy-ki" style="width:100%"></div></div><span class="stat-val" id="val-enemy-ki">40/40</span></div>
+      <div class="status-tags" id="tags-enemy"></div>
+    </div>
+  </div>
+  <div class="log-box" onclick="onLogClick()">
+    <div class="turn-indicator" id="turn-indicator">TURNO 1 · JUGADOR</div>
+    <div id="log-text"><div class="log-line"></div></div>
+    <div class="log-arrow" id="log-arrow">▼ continuar</div>
+  </div>
+  <div class="action-panel">
+    <div class="action-panel-header">
+      <span id="panel-title">TAI SABAKI</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span class="panel-phase" id="panel-phase"></span>
+        <button class="btn" style="padding:2px 10px;font-size:.56rem;" onclick="showTree()">🌿 ÁRBOL</button>
+      </div>
+    </div>
+    <div class="sabaki-chosen" id="sabaki-chosen"></div>
+    <div id="panel-content"></div>
+  </div>
+  <div class="bottom-bar">
+    <button class="btn" onclick="showHelp()">? AYUDA</button>
+    <button class="btn" onclick="betaPanel()" style="font-size:.6rem;color:#e07070;border-color:#3a1a1a;">🧪 BETA</button>
+    <button class="btn primary" onclick="startNewCombat()">↺ NUEVO COMBATE</button>
+  </div>
+</div>
+
+<!-- Beta tester panel -->
+<div class="overlay" id="beta-overlay">
+  <div style="background:var(--panel);border:1px solid #e07070;border-radius:12px;padding:24px 28px;max-width:340px;width:100%;">
+    <div style="font-family:'Noto Serif JP',serif;font-size:.9rem;letter-spacing:.2em;color:#e07070;margin-bottom:14px;">🧪 PANEL BETA TESTER</div>
+    <div style="font-size:.65rem;color:var(--text-dim);margin-bottom:16px;line-height:1.6;">Herramientas de prueba. Solo para desarrollo.<br><span id="storage-status" style="font-size:.6rem;"></span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn" onclick="betaAddExp()" style="text-align:left;">+ Añadir 50 EXP</button>
+      <button class="btn" onclick="betaNextBelt()" style="text-align:left;">⬆ Subir cinturón directo</button>
+      <button class="btn" onclick="betaResetAll()" style="text-align:left;color:#e07070;border-color:#3a1a1a;">✕ Resetear TODO a cero</button>
+    </div>
+    <button class="btn primary" onclick="closeBetaPanel()" style="margin-top:16px;width:100%;">CERRAR</button>
+  </div>
+</div>
+
+<!-- Overlays -->
+<div class="overlay" id="overlay">
+  <h2 id="overlay-title"></h2>
+  <p id="overlay-sub"></p>
+  <p id="overlay-exp" style="color:var(--exp);margin-top:4px;font-size:.75rem;"></p>
+  <button class="btn primary" onclick="overlayNext()" style="margin-top:12px" id="overlay-btn">SIGUIENTE</button>
+</div>
+<div class="overlay" id="beltup-overlay">
+  <div class="belt-up-box">
+    <h3>¡ASCENSO DE CINTURÓN!</h3>
+    <div class="new-belt" id="beltup-icon"></div>
+    <div id="beltup-title" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;letter-spacing:.2em;color:var(--accent);margin-top:4px;"></div>
+    <div id="beltup-kyu" style="font-size:.68rem;color:var(--text-dim);letter-spacing:.15em;margin-top:2px;"></div>
+    <div class="unlocked" id="beltup-unlocked"></div>
+    <button class="btn primary" onclick="closeBeltUp()" style="margin-top:16px">¡CONTINUAR!</button>
+  </div>
+</div>
+<div class="tree-overlay" id="tree-overlay">
+  <div class="tree-box">
+    <h2>🌿 ÁRBOL DE TÉCNICAS</h2>
+    <div id="tree-content"></div>
+    <button class="btn primary" onclick="closeTree()" style="margin-top:12px;width:100%;">CERRAR</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// COMPATIBILITY TABLES
+// ══════════════════════════════════════════════════════
+// 3=óptimo 2=bueno 1=neutro 0=malo
+const SABAKI_COMPAT={
+  irimi: {ikkyo:2,kokyu:1,ki_charge:1,kote:2,nikyo:1,irimi_nage:3,sankyo:2,kaiten:1,yonkyo:1,tenchi:3},
+  tenkan:{ikkyo:3,kokyu:3,ki_charge:1,kote:1,nikyo:1,irimi_nage:0,sankyo:1,kaiten:3,yonkyo:2,tenchi:0},
+  tenshi:{ikkyo:3,kokyu:2,ki_charge:1,kote:3,nikyo:2,irimi_nage:2,sankyo:1,kaiten:2,yonkyo:3,tenchi:2},
+  pivot: {ikkyo:2,kokyu:0,ki_charge:3,kote:0,nikyo:3,irimi_nage:1,sankyo:3,kaiten:0,yonkyo:2,tenchi:1},
+};
+const ATTACK_SABAKI_COMPAT={
+  shomen: {irimi:2,tenkan:3,tenshi:2,pivot:1},
+  yokomen:{irimi:1,tenkan:2,tenshi:3,pivot:2},
+  tsuki:  {irimi:3,tenkan:1,tenshi:2,pivot:3},
+  katate: {irimi:2,tenkan:2,tenshi:1,pivot:3},
+};
+const COMPAT_LEVELS=[
+  {level:0,label:'MALO',  symbol:'✗',cls:'bad', dmgMult:.4, expMult:.6, failChance:.35},
+  {level:1,label:'NEUTRO',symbol:'○',cls:'neut',dmgMult:.7, expMult:.8, failChance:.15},
+  {level:2,label:'BUENO', symbol:'✦',cls:'good',dmgMult:1.0,expMult:1.0,failChance:.05},
+  {level:3,label:'ÓPTIMO',symbol:'◎',cls:'opt', dmgMult:1.5,expMult:1.5,failChance:0},
+];
+function getCompat(sabakiKey,moveKey,attackType){
+  const sc=SABAKI_COMPAT[sabakiKey]?.[moveKey]??1;
+  const ac=ATTACK_SABAKI_COMPAT[attackType]?.[sabakiKey]??1;
+  return COMPAT_LEVELS[Math.floor((sc+ac)/2)];
+}
+
+// ══════════════════════════════════════════════════════
+// TAI SABAKI & ATTACK DEFINITIONS
+// ══════════════════════════════════════════════════════
+const SABAKI=[
+  {key:'irimi', name:'IRIMI', jp:'入身 — Entrada directa',desc:'Avanzas hacia el atacante, absorbiendo su fuerza.'},
+  {key:'tenkan',name:'TENKAN',jp:'転換 — Giro 180°',      desc:'Giras sobre el pie delantero, redirigiendo el impulso.'},
+  {key:'tenshi',name:'TENSHI',jp:'転使 — Diagonal',       desc:'Paso diagonal, equilibrado para cualquier técnica.'},
+  {key:'pivot', name:'PIVOT', jp:'回転 — En sitio',       desc:'Te quedas en posición, ideal para controles directos.'},
+];
+const ATTACK_TYPES=[
+  {key:'shomen', name:'SHOMEN-UCHI',jp:'正面打',  desc:'Golpe frontal directo descendente.'},
+  {key:'yokomen',name:'YOKOMEN-UCHI',jp:'横面打',  desc:'Golpe diagonal al costado de la cabeza.'},
+  {key:'tsuki',  name:'TSUKI',      jp:'突き',    desc:'Puñetazo recto al cuerpo.'},
+  {key:'katate', name:'KATATE-DORI',jp:'片手取り',desc:'Agarre de muñeca.'},
+];
+
+// ══════════════════════════════════════════════════════
+// BELTS
+// ══════════════════════════════════════════════════════
+const BELTS=[
+  {kyu:7,name:'BLANCO',       color:'#e8e8e8',exp:60},
+  {kyu:6,name:'AMARILLO',     color:'#f0d060',exp:100},
+  {kyu:5,name:'NARANJA',      color:'#e89040',exp:150},
+  {kyu:4,name:'VERDE',        color:'#60b860',exp:220},
+  {kyu:3,name:'AZUL',         color:'#5090d0',exp:300},
+  {kyu:2,name:'MARRÓN',       color:'#8b5e3c',exp:400},
+  {kyu:1,name:'MARRÓN OSCURO',color:'#5a3a20',exp:9999},
+];
+
+// ══════════════════════════════════════════════════════
+// TECHNIQUES
+// ══════════════════════════════════════════════════════
+// execute returns {msg, shake?, failed?}
+// Ki cost is deducted ONLY if technique does not fail
+const ALL_MOVES={
+  ikkyo:{
+    name:'一教 IKKYŌ',type:'control',kiCost:0,expGain:8,beltReq:0,
+    desc:'Inmovilización básica. Daño moderado.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} no logra el ángulo de IKKYŌ. ¡Técnica fallida!`};
+      const dmg=Math.max(1,Math.round((a.atk-Math.floor(d.arm*.4)+rand(-3,3))*c.dmgMult));
+      dealDamage(d,dmg);snd('hit');
+      return{msg:`${a.name} ejecuta IKKYŌ — ${dmg} de daño.`,shake:d===ENEMY?'enemy':'player'};
+    }
+  },
+  kokyu:{
+    name:'呼吸投 KOKYŪ',type:'redirect',kiCost:15,expGain:14,beltReq:0,
+    desc:'Redirige el próximo ataque enemigo.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} pierde el ángulo en KOKYŪ. ¡Técnica fallida!`};
+      a.statuses.push('redirect');snd('ki');
+      return{msg:`${a.name} entra en REDIRECCIÓN. El próximo ataque será devuelto.`};
+    }
+  },
+  ki_charge:{
+    name:'気 KI FOCUS',type:'ki',kiCost:0,expGain:5,beltReq:0,
+    desc:'Concentra tu energía. Recupera 20 Ki.',
+    execute(a,d,c){
+      // Always works regardless of compat
+      const g=20;a.ki=Math.min(a.maxKi,a.ki+g);snd('ki_charge');
+      return{msg:`${a.name} concentra su KI — recupera ${g} de energía.`};
+    }
+  },
+  kote:{
+    name:'小手返 KOTE',type:'throw',kiCost:25,expGain:18,beltReq:0,
+    desc:'Giro de muñeca. Aturde al enemigo.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} pierde el agarre en KOTE-GAESHI. ¡Técnica fallida!`};
+      const dmg=Math.max(1,Math.round((Math.floor(a.atk*1.3)-Math.floor(d.arm*.25)+rand(-2,2))*c.dmgMult));
+      dealDamage(d,dmg);d.statuses.push('stunned');snd('hit');snd('stun');
+      return{msg:`${a.name} lanza KOTE-GAESHI — ${dmg} de daño. ¡${d.name} queda aturdido!`,shake:d===ENEMY?'enemy':'player'};
+    }
+  },
+  nikyo:{
+    name:'二教 NIKYŌ',type:'pin',kiCost:10,expGain:16,beltReq:1,
+    desc:'Torsión avanzada de muñeca.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} pierde el control en NIKYŌ. ¡Técnica fallida!`};
+      const dmg=Math.max(1,Math.round((Math.floor(a.atk*1.1)-Math.floor(d.arm*.35)+rand(-2,3))*c.dmgMult));
+      dealDamage(d,dmg);snd('hit');
+      return{msg:`${a.name} aplica NIKYŌ — ${dmg} de daño con torsión precisa.`,shake:d===ENEMY?'enemy':'player'};
+    }
+  },
+  irimi_nage:{
+    name:'入身投 IRIMI-N',type:'throw',kiCost:20,expGain:20,beltReq:1,
+    desc:'Entrada directa. Daño alto penetrante.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} no encuentra la línea. ¡IRIMI-NAGE falla!`};
+      const dmg=Math.max(1,Math.round((Math.floor(a.atk*1.4)-Math.floor(d.arm*.3)+rand(-3,3))*c.dmgMult));
+      dealDamage(d,dmg);snd('hit');
+      return{msg:`${a.name} entra con IRIMI-NAGE — ${dmg} de daño penetrante.`,shake:d===ENEMY?'enemy':'player'};
+    }
+  },
+  sankyo:{
+    name:'三教 SANKYŌ',type:'pin',kiCost:15,expGain:20,beltReq:2,
+    desc:'Tercer control. Reduce ARM del enemigo.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} no logra el control nervioso. ¡SANKYŌ falla!`};
+      const dmg=Math.max(1,Math.round((a.atk-Math.floor(d.arm*.3)+rand(-2,3))*c.dmgMult));
+      dealDamage(d,dmg);
+      if(!d.statuses.includes('arm_down')){d.arm=Math.max(1,d.arm-4);d.statuses.push('arm_down');}
+      snd('hit');
+      return{msg:`${a.name} aplica SANKYŌ — ${dmg} de daño. La armadura de ${d.name} cede.`,shake:d===ENEMY?'enemy':'player'};
+    }
+  },
+  kaiten:{
+    name:'回転投 KAITEN',type:'redirect',kiCost:30,expGain:24,beltReq:2,
+    desc:'Giro + redirección. Daño y redirige.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} pierde el ritmo en KAITEN-NAGE. ¡Fallo!`};
+      const dmg=Math.max(1,Math.round((Math.floor(a.atk*.8)-Math.floor(d.arm*.2)+rand(-2,2))*c.dmgMult));
+      dealDamage(d,dmg);a.statuses.push('redirect');snd('ki');snd('hit');
+      return{msg:`${a.name} lanza KAITEN-NAGE — ${dmg} de daño y entra en REDIRECCIÓN.`,shake:d===ENEMY?'enemy':'player'};
+    }
+  },
+  yonkyo:{
+    name:'四教 YONKYŌ',type:'pin',kiCost:20,expGain:26,beltReq:3,
+    desc:'Control nervioso de cuarto nivel.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} no encuentra el punto nervioso. ¡YONKYŌ falla!`};
+      const dmg=Math.max(1,Math.round((Math.floor(a.atk*1.5)-Math.floor(d.arm*.25)+rand(-3,4))*c.dmgMult));
+      dealDamage(d,dmg);snd('hit');
+      return{msg:`${a.name} presiona YONKYŌ — ${dmg} de daño con precisión nerviosa.`,shake:d===ENEMY?'enemy':'player'};
+    }
+  },
+  tenchi:{
+    name:'天地投 TENCHI',type:'throw',kiCost:35,expGain:30,beltReq:3,
+    desc:'Cielo y tierra. Lanzamiento devastador.',
+    execute(a,d,c){
+      if(Math.random()<c.failChance)return{failed:true,msg:`${a.name} pierde el equilibrio en TENCHI-NAGE. ¡Fallo!`};
+      const dmg=Math.max(1,Math.round((Math.floor(a.atk*1.6)-Math.floor(d.arm*.2)+rand(-4,5))*c.dmgMult));
+      dealDamage(d,dmg);snd('hit');snd('stun');
+      return{msg:`${a.name} ejecuta TENCHI-NAGE — ${dmg} de daño. ¡${d.name} es arrojado!`,shake:d===ENEMY?'enemy':'player'};
+    }
+  },
+};
+
+// ══════════════════════════════════════════════════════
+// SAVE / LOAD  (window.storage for sandbox, localStorage fallback)
+// ══════════════════════════════════════════════════════
+const SAVE_KEY='aikido_save_v5';
+let PROGRESS={beltIndex:0,exp:0,totalExp:0};
+let activeLoadout=['ikkyo','kokyu','ki_charge','kote'];
+
+async function saveGame(){
+  const data=JSON.stringify({beltIndex:PROGRESS.beltIndex,exp:PROGRESS.exp,totalExp:PROGRESS.totalExp,loadout:activeLoadout});
+  try{
+    if(window.storage){await window.storage.set(SAVE_KEY,data);}
+    else{localStorage.setItem(SAVE_KEY,data);}
+  }catch(e){}
+}
+
+async function loadGame(){
+  try{
+    let raw=null;
+    if(window.storage){
+      const r=await window.storage.get(SAVE_KEY);
+      raw=r?r.value:null;
+    }else{
+      raw=localStorage.getItem(SAVE_KEY);
+    }
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    PROGRESS={
+      beltIndex:Math.min(d.beltIndex||0,BELTS.length-1),
+      exp:d.exp||0,
+      totalExp:d.totalExp||0
+    };
+    if(Array.isArray(d.loadout)&&d.loadout.length===4){
+      const u=getUnlockedKeys();
+      const v=d.loadout.filter(k=>u.includes(k));
+      activeLoadout=v.length===4?v:buildDefaultLoadout();
+    }
+  }catch(e){}
+}
+
+async function clearSave(){
+  try{
+    if(window.storage){await window.storage.delete(SAVE_KEY);}
+    else{localStorage.removeItem(SAVE_KEY);}
+  }catch(e){}
+}
+function getUnlockedKeys(){return Object.keys(ALL_MOVES).filter(k=>ALL_MOVES[k].beltReq<=PROGRESS.beltIndex);}
+function buildDefaultLoadout(){
+  // ki_charge is always pinned in the loadout (available at all ranks)
+  const others=Object.keys(ALL_MOVES).filter(k=>k!=='ki_charge'&&ALL_MOVES[k].beltReq<=PROGRESS.beltIndex);
+  // Take the 3 most advanced unlocked techniques + ki_charge
+  const pick=others.slice(-3);
+  // Pad with base moves if fewer than 3 unlocked others
+  const base=['ikkyo','kokyu','kote'];
+  const padded=[...new Set([...pick,...base])].filter(k=>k!=='ki_charge').slice(0,3);
+  return [...padded,'ki_charge'];
+}
+
+// ══════════════════════════════════════════════════════
+// PROGRESSION
+// ══════════════════════════════════════════════════════
+function getCurrentBelt(){return BELTS[PROGRESS.beltIndex];}
+function gainExp(amt){
+  PROGRESS.exp+=amt;PROGRESS.totalExp+=amt;
+  const belt=getCurrentBelt();
+  if(PROGRESS.beltIndex<BELTS.length-1&&PROGRESS.exp>=belt.exp){
+    PROGRESS.exp-=belt.exp;PROGRESS.beltIndex++;saveGame();return true;
+  }
+  saveGame();return false;
+}
+function updateBeltUI(){
+  const belt=getCurrentBelt(),maxed=PROGRESS.beltIndex>=BELTS.length-1;
+  document.getElementById('belt-icon').style.background=belt.color;
+  document.getElementById('belt-label').textContent=`${belt.kyu}º KYU`;
+  document.getElementById('belt-kyu').textContent=belt.name;
+  document.getElementById('exp-fill').style.width=(maxed?100:Math.min(100,(PROGRESS.exp/belt.exp)*100))+'%';
+  document.getElementById('exp-val').textContent=maxed?'MAESTRO':`${PROGRESS.exp} / ${belt.exp} EXP`;
+}
+
+// ══════════════════════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════════════════════
+const ENEMY_ROSTER=[
+  {name:'KENZAN', hp:90, ki:40,atk:20,arm:15,sprite:'👤'},
+  {name:'RYOUTA', hp:105,ki:50,atk:23,arm:18,sprite:'🥷'},
+  {name:'SENSEI', hp:125,ki:60,atk:27,arm:23,sprite:'👘'},
+];
+let PLAYER={name:'TAKESHI',hp:80,maxHp:80,ki:50,maxKi:50,atk:18,arm:22,statuses:[]};
+let ENEMY={};
+let turn=1,isPlayerTurn=true;
+
+// Phase: 'waiting'|'sabaki'|'technique'
+// 'waiting' = log message running, buttons hidden
+// 'sabaki'  = show sabaki grid, player can click
+// 'technique' = show technique grid, player can click
+let phase='waiting';
+let chosenSabaki=null;
+let chosenAttack=null;
+
+function buildEnemy(){
+  const base=ENEMY_ROSTER[Math.min(PROGRESS.beltIndex,ENEMY_ROSTER.length-1)];
+  ENEMY={...base,maxHp:base.hp,maxKi:base.ki,statuses:[],arm:base.arm};
+  document.getElementById('enemy-name').textContent=base.name;
+  document.getElementById('enemy-sprite').textContent=base.sprite;
+}
+function resetCombatState(){
+  const b=PROGRESS.beltIndex;
+  PLAYER={name:'TAKESHI',hp:80+b*6,maxHp:80+b*6,ki:50+b*5,maxKi:50+b*5,atk:18+b*2,arm:22+b*2,statuses:[]};
+  document.getElementById('chip-atq').textContent=PLAYER.atk;
+  document.getElementById('chip-arm').textContent=PLAYER.arm;
+  buildEnemy();
+  turn=1;isPlayerTurn=true;phase='waiting';chosenSabaki=null;chosenAttack=null;
+}
+
+// ══════════════════════════════════════════════════════
+// AUDIO
+// ══════════════════════════════════════════════════════
+let _ac=null;
+function ac(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();return _ac;}
+function snd(t){
+  try{
+    const ctx=ac();
+    if(t==='hit'){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';o.frequency.setValueAtTime(180,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(60,ctx.currentTime+.12);
+      g.gain.setValueAtTime(.35,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.15);
+      o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.15);
+      const buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*.07),ctx.sampleRate),dd=buf.getChannelData(0);
+      for(let i=0;i<dd.length;i++)dd[i]=(Math.random()*2-1)*.4;
+      const src=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g2=ctx.createGain();
+      src.buffer=buf;f.type='bandpass';f.frequency.value=300;f.Q.value=.8;
+      g2.gain.setValueAtTime(.18,ctx.currentTime);g2.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.07);
+      src.connect(f);f.connect(g2);g2.connect(ctx.destination);src.start();src.stop(ctx.currentTime+.07);
+    }
+    else if(t==='ki'){const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(320,ctx.currentTime);o.frequency.linearRampToValueAtTime(640,ctx.currentTime+.3);g.gain.setValueAtTime(.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.35);}
+    else if(t==='ki_charge'){[0,1,2].forEach(i=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=260+i*80;g.gain.setValueAtTime(0,ctx.currentTime+i*.08);g.gain.linearRampToValueAtTime(.12,ctx.currentTime+i*.08+.1);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.08+.4);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+i*.08);o.stop(ctx.currentTime+i*.08+.4);});}
+    else if(t==='stun'){const o=ctx.createOscillator(),g=ctx.createGain();o.type='square';o.frequency.setValueAtTime(220,ctx.currentTime);o.frequency.setValueAtTime(180,ctx.currentTime+.05);o.frequency.setValueAtTime(220,ctx.currentTime+.1);g.gain.setValueAtTime(.07,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.2);}
+    else if(t==='sabaki'){const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.setValueAtTime(440,ctx.currentTime);o.frequency.linearRampToValueAtTime(550,ctx.currentTime+.1);g.gain.setValueAtTime(.1,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.2);}
+    else if(t==='fail'){const o=ctx.createOscillator(),g=ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(160,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(100,ctx.currentTime+.2);g.gain.setValueAtTime(.1,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.25);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.25);}
+    else if(t==='beltup'){[261,330,392,523,659].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.2,ctx.currentTime+i*.09);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.09+.4);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+i*.09);o.stop(ctx.currentTime+i*.09+.4);});}
+    else if(t==='victory'){[523,659,784,1047].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.18,ctx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.1+.5);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+i*.1);o.stop(ctx.currentTime+i*.1+.5);});}
+    else if(t==='defeat'){const o=ctx.createOscillator(),g=ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(200,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(70,ctx.currentTime+.7);g.gain.setValueAtTime(.14,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.7);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.7);}
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════════════════
+// MESSAGE QUEUE  (typewriter + click-to-advance)
+// ══════════════════════════════════════════════════════
+let msgQueue=[],typingTimer=null,waitingConfirm=false,skipTyping=false,pendingConfirm=null,qRunning=false;
+const TSPEED=26;
+
+function enq(e){msgQueue.push(e);}
+function flush(){if(!qRunning){qRunning=true;nextMsg();}}
+
+function nextMsg(){
+  if(msgQueue.length===0){qRunning=false;waitingConfirm=false;showArrow(false);renderPanel();return;}
+  const e=msgQueue.shift();
+  if(e.snap)applySnap(e.snap);
+  if(e.shake)shakeCard(e.shake);
+  if(e.flash)flashScreen();
+  typewrite(e.text,e.dim||false,()=>{
+    showArrow(true);waitingConfirm=true;
+    pendingConfirm=()=>{waitingConfirm=false;showArrow(false);if(e.cb)e.cb();nextMsg();};
+  });
+}
+
+function onLogClick(){
+  if(typingTimer!==null){skipTyping=true;return;}
+  if(waitingConfirm&&pendingConfirm)pendingConfirm();
+}
+
+function typewrite(text,dim,onDone){
+  skipTyping=false;
+  const el=document.getElementById('log-text');
+  const line=document.createElement('div');line.className='log-line'+(dim?' dim':'');
+  el.innerHTML='';el.appendChild(line);
+  let i=0;const cur=document.createElement('span');cur.className='log-cursor';
+  function tick(){
+    if(skipTyping){clearTimeout(typingTimer);typingTimer=null;line.textContent=text;onDone();return;}
+    if(i<text.length){line.textContent=text.slice(0,i+1);line.appendChild(cur);i++;typingTimer=setTimeout(tick,TSPEED);}
+    else{typingTimer=null;cur.remove();onDone();}
+  }
+  typingTimer=setTimeout(tick,TSPEED);
+}
+function showArrow(s){document.getElementById('log-arrow').classList.toggle('show',s);}
+
+// ══════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function hasStatus(f,s){return f.statuses.includes(s);}
+function removeStatus(f,s){f.statuses=f.statuses.filter(x=>x!==s);}
+function dealDamage(f,d){f.hp=Math.max(0,f.hp-d);}
+function pickRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+// ══════════════════════════════════════════════════════
+// UI SNAPSHOT
+// ══════════════════════════════════════════════════════
+function snap(){
+  return{pHp:PLAYER.hp,pKi:PLAYER.ki,eHp:ENEMY.hp,eKi:ENEMY.ki,
+    pSt:[...PLAYER.statuses],eSt:[...ENEMY.statuses]};
+}
+function applySnap(s){
+  setBar('player','hp',s.pHp,PLAYER.maxHp);setBar('player','ki',s.pKi,PLAYER.maxKi);
+  setBar('enemy','hp',s.eHp,ENEMY.maxHp);setBar('enemy','ki',s.eKi,ENEMY.maxKi);
+  renderTagsRaw('tags-player',s.pSt);renderTagsRaw('tags-enemy',s.eSt);
+  document.getElementById('turn-indicator').textContent=`TURNO ${turn} · ${isPlayerTurn?'JUGADOR':'ENEMIGO'}`;
+}
+
+// ══════════════════════════════════════════════════════
+// UI RENDER
+// ══════════════════════════════════════════════════════
+function setBar(who,stat,cur,max){
+  const pct=Math.max(0,Math.min(100,(cur/max)*100));
+  document.getElementById(`bar-${who}-${stat}`).style.width=pct+'%';
+  document.getElementById(`val-${who}-${stat}`).textContent=`${cur}/${max}`;
+}
+function renderTagsRaw(id,statuses){
+  document.getElementById(id).innerHTML=statuses.map(s=>{
+    if(s==='redirect')return`<span class="tag redirect">⟲ REDIRIGIENDO</span>`;
+    if(s==='stunned')return`<span class="tag stunned">✦ ATURDIDO</span>`;
+    if(s==='arm_down')return`<span class="tag arm_down">↓ ARMADURA</span>`;
+    return'';
+  }).join('');
+}
+
+function renderPanel(){
+  const content=document.getElementById('panel-content');
+  const title=document.getElementById('panel-title');
+  const phaseEl=document.getElementById('panel-phase');
+  const strip=document.getElementById('sabaki-chosen');
+
+  if(phase==='waiting'){
+    title.textContent='—';phaseEl.textContent='';strip.classList.remove('show');
+    content.innerHTML='<div class="waiting-msg">…</div>';
+    return;
+  }
+  if(phase==='sabaki'){
+    title.textContent='TAI SABAKI — ELIGE TU ENTRADA';
+    phaseEl.textContent='FASE 1 / 2';
+    strip.classList.remove('show');
+    renderSabakiGrid(content);
+    return;
+  }
+  if(phase==='technique'){
+    title.textContent='ELIGE UNA TÉCNICA';
+    phaseEl.textContent='FASE 2 / 2';
+    const sab=SABAKI.find(s=>s.key===chosenSabaki);
+    const atk=ATTACK_TYPES.find(a=>a.key===chosenAttack);
+    strip.textContent=`⟶ ${sab?.name||''} · vs ${atk?.jp||''}`;
+    strip.classList.add('show');
+    renderTechGrid(content);
+  }
+}
+
+function renderSabakiGrid(container){
+  const grid=document.createElement('div');grid.className='sabaki-grid';
+  SABAKI.forEach(s=>{
+    const acLevel=ATTACK_SABAKI_COMPAT[chosenAttack]?.[s.key]??1;
+    const cl=COMPAT_LEVELS[acLevel];
+    const btn=document.createElement('button');btn.className='sabaki-btn';
+    btn.onclick=()=>chooseSabaki(s.key);
+    btn.innerHTML=`<span class="sabaki-name">${s.name}</span>
+      <span class="sabaki-jp">${s.jp}</span>
+      <div class="sabaki-compat compat-${cl.cls}">${cl.symbol} vs ataque</div>
+      <div class="move-desc" style="margin-top:4px;">${s.desc}</div>`;
+    grid.appendChild(btn);
+  });
+  container.innerHTML='';container.appendChild(grid);
+}
+
+function renderTechGrid(container){
+  const grid=document.createElement('div');grid.className='moves-grid';
+  activeLoadout.forEach(key=>{
+    const m=ALL_MOVES[key];if(!m)return;
+    const unlocked=m.beltReq<=PROGRESS.beltIndex;
+    const compat=getCompat(chosenSabaki,key,chosenAttack);
+    // Ki Focus always shows base EXP
+    const expPreview=key==='ki_charge'?m.expGain:Math.round(m.expGain*compat.expMult);
+    const kiLabel=m.kiCost>0?`-${m.kiCost}`:'+0';
+    const btn=document.createElement('button');
+    btn.className=`move-btn type-${m.type}`;
+    btn.disabled=!unlocked||(m.kiCost>0&&PLAYER.ki<m.kiCost);
+    btn.onclick=()=>doPlayerAction(key);
+    btn.innerHTML=`<span class="compat-badge ${compat.cls}">${compat.symbol}</span>
+      <span class="move-name">${m.name}</span>
+      <div class="move-meta">
+        <span class="move-type">${m.type.toUpperCase()}</span>
+        <span class="move-ki">Ki:${kiLabel}</span>
+        <span class="move-req">+${expPreview}EXP</span>
+      </div>
+      <div class="move-desc">${m.desc}</div>`;
+    grid.appendChild(btn);
+  });
+  container.innerHTML='';container.appendChild(grid);
+}
+
+function flashScreen(){const f=document.getElementById('flash');f.classList.add('active');setTimeout(()=>f.classList.remove('active'),200);}
+function shakeCard(w){const c=document.getElementById(`card-${w}`);c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');}
+
+function updateBaseUI(){
+  setBar('player','hp',PLAYER.hp,PLAYER.maxHp);setBar('player','ki',PLAYER.ki,PLAYER.maxKi);
+  setBar('enemy','hp',ENEMY.hp,ENEMY.maxHp);setBar('enemy','ki',ENEMY.ki,ENEMY.maxKi);
+  renderTagsRaw('tags-player',PLAYER.statuses);renderTagsRaw('tags-enemy',ENEMY.statuses);
+  updateBeltUI();
+  document.getElementById('turn-indicator').textContent=`TURNO ${turn} · ${isPlayerTurn?'JUGADOR':'ENEMIGO'}`;
+}
+
+// ══════════════════════════════════════════════════════
+// ENEMY AI
+// ══════════════════════════════════════════════════════
+const EMOVES={
+  strike:{execute(a,d){
+    if(hasStatus(d,'redirect')){removeStatus(d,'redirect');const dmg=Math.max(1,a.atk-Math.floor(d.arm*.2));dealDamage(a,dmg);snd('hit');return{msg:`¡${d.name} REDIRIGE! ${a.name} recibe ${dmg} de daño.`,shake:'enemy'};}
+    const dmg=Math.max(1,a.atk-Math.floor(d.arm*.4)+rand(-3,4));dealDamage(d,dmg);snd('hit');return{msg:`${a.name} ataca directo — ${dmg} de daño a ${d.name}.`,shake:'player'};
+  }},
+  heavy:{execute(a,d){
+    if(hasStatus(d,'redirect')){removeStatus(d,'redirect');const dmg=Math.max(1,Math.floor(a.atk*1.6));dealDamage(a,dmg);snd('hit');return{msg:`¡REDIRECCIÓN PERFECTA! El golpe vuelve — ${dmg} de daño a ${a.name}.`,shake:'enemy'};}
+    const dmg=Math.max(1,Math.floor(a.atk*1.5)-Math.floor(d.arm*.3)+rand(-2,3));dealDamage(d,dmg);snd('hit');return{msg:`${a.name} lanza un GOLPE POTENTE — ${dmg} de daño.`,shake:'player'};
+  }},
+  guard:{execute(a,d){a.ki=Math.min(a.maxKi,a.ki+12);return{msg:`${a.name} adopta posición defensiva y recupera Ki.`};}}
+};
+function chooseEnemyMove(){if(ENEMY.ki<10)return'guard';const r=Math.random();return r<.45?'strike':r<.75?'heavy':'guard';}
+
+// ══════════════════════════════════════════════════════
+// TURN FLOW
+// ══════════════════════════════════════════════════════
+
+// Called to start each player turn: announce enemy attack, then show sabaki
+function beginPlayerTurn(){
+  isPlayerTurn=true;
+  chosenAttack=pickRandom(ATTACK_TYPES).key;
+  chosenSabaki=null;
+  const atk=ATTACK_TYPES.find(a=>a.key===chosenAttack);
+  phase='waiting';
+  qRunning=false;
+  enq({
+    text:`${ENEMY.name} lanza un ${atk.name} (${atk.jp}). ¡Elige tu entrada!`,
+    snap:snap(),
+    cb:()=>{phase='sabaki';renderPanel();}
+  });
+  flush();
+}
+
+function chooseSabaki(key){
+  if(phase!=='sabaki')return;
+  chosenSabaki=key;
+  phase='technique';
+  snd('sabaki');
+  renderPanel();
+}
+
+function doPlayerAction(key){
+  if(phase!=='technique')return;
+  const m=ALL_MOVES[key];
+  if(!m||m.beltReq>PROGRESS.beltIndex)return;
+  if(m.kiCost>0&&PLAYER.ki<m.kiCost){
+    phase='waiting';qRunning=false;
+    enq({text:'⚠ Ki insuficiente para esta técnica.',cb:()=>{phase='technique';renderPanel();}});
+    flush();return;
+  }
+
+  phase='waiting';
+  const compat=getCompat(chosenSabaki,key,chosenAttack);
+  const result=m.execute(PLAYER,ENEMY,compat);
+  const failed=result.failed===true;
+
+  // Only deduct Ki if not already deducted and technique worked (fail = no cost)
+  // NOTE: ki_charge has kiCost=0 always; others deduct only on success
+  if(!failed&&m.kiCost>0){
+    PLAYER.ki=Math.max(0,PLAYER.ki-m.kiCost);
+  }
+
+  if(failed)snd('fail');
+
+  const expEarned=failed?0:(key==='ki_charge'?m.expGain:Math.round(m.expGain*compat.expMult));
+  const beltedUp=expEarned>0?gainExp(expEarned):false;
+  updateBeltUI();
+
+  const s=snap();
+  qRunning=false;
+  // Message 1: compat line
+  enq({text:`[${compat.symbol} ${compat.label}] ${SABAKI.find(x=>x.key===chosenSabaki)?.name||chosenSabaki} + ${m.name}`,dim:true,snap:s});
+  // Message 2: result
+  enq({
+    text:result.msg+(expEarned>0?`  (+${expEarned} EXP)`:''),
+    shake:result.shake,flash:!failed,snap:s,
+    cb:()=>{
+      if(beltedUp){showBeltUp();return;}
+      if(checkGameOver())return;
+      doEnemyTurn();
+    }
+  });
+  flush();
+}
+
+function doEnemyTurn(){
+  isPlayerTurn=false;
+  phase='waiting';
+  document.getElementById('turn-indicator').textContent=`TURNO ${turn} · ENEMIGO`;
+  renderPanel();
+  qRunning=false;
+
+  if(hasStatus(ENEMY,'stunned')){
+    removeStatus(ENEMY,'stunned');
+    enq({text:`${ENEMY.name} está aturdido y pierde su turno.`,dim:true,snap:snap(),cb:()=>finishTurn()});
+    flush();return;
+  }
+  const result=EMOVES[chooseEnemyMove()].execute(ENEMY,PLAYER);
+  enq({text:result.msg,shake:result.shake,flash:true,snap:snap(),
+    cb:()=>{if(!checkGameOver())finishTurn();}
+  });
+  flush();
+}
+
+function finishTurn(){
+  turn++;
+  PLAYER.ki=Math.min(PLAYER.maxKi,PLAYER.ki+5);
+  ENEMY.ki=Math.min(ENEMY.maxKi,ENEMY.ki+5);
+  phase='waiting';qRunning=false;
+  enq({
+    text:`— Turno ${turn}. El oponente se prepara.`,
+    dim:true,snap:snap(),
+    cb:()=>beginPlayerTurn()
+  });
+  flush();
+}
+
+// ══════════════════════════════════════════════════════
+// GAME OVER
+// ══════════════════════════════════════════════════════
+let pendingBeltUp=false;
+function checkGameOver(){
+  if(PLAYER.hp<=0){endCombat(false);return true;}
+  if(ENEMY.hp<=0){endCombat(true);return true;}
+  return false;
+}
+function endCombat(won){
+  phase='waiting';qRunning=false;renderPanel();
+  if(won){
+    snd('victory');
+    const bonus=20;const bu=gainExp(bonus);updateBeltUI();
+    document.getElementById('overlay-title').textContent='⛩ VICTORIA';
+    document.getElementById('overlay-sub').textContent='Has demostrado la verdadera armonía del aikido.';
+    document.getElementById('overlay-exp').textContent=`+${bonus} EXP de victoria`;
+    document.getElementById('overlay-btn').textContent='SIGUIENTE COMBATE';
+    if(bu)pendingBeltUp=true;
+  }else{
+    snd('defeat');
+    document.getElementById('overlay-title').textContent='☯ DERROTA';
+    document.getElementById('overlay-sub').textContent='El camino es largo. Vuelve a intentarlo.';
+    document.getElementById('overlay-exp').textContent='';
+    document.getElementById('overlay-btn').textContent='INTENTAR DE NUEVO';
+  }
+  document.getElementById('overlay').classList.add('show');
+}
+function overlayNext(){
+  document.getElementById('overlay').classList.remove('show');
+  if(pendingBeltUp){pendingBeltUp=false;showBeltUp(true);return;}
+  startNewCombat();
+}
+
+// ══════════════════════════════════════════════════════
+// BELT UP
+// ══════════════════════════════════════════════════════
+let beltUpFromVictory=false;
+
+function showBeltUp(fromVictory=false){
+  beltUpFromVictory=fromVictory;
+  phase='waiting';qRunning=false;
+  const belt=getCurrentBelt();snd('beltup');
+  document.getElementById('beltup-icon').style.background=belt.color;
+  document.getElementById('beltup-title').textContent=belt.name;
+  document.getElementById('beltup-kyu').textContent=`${belt.kyu}º KYU`;
+  const newMoves=Object.entries(ALL_MOVES).filter(([k,m])=>m.beltReq===PROGRESS.beltIndex);
+  document.getElementById('beltup-unlocked').innerHTML=newMoves.length>0
+    ?'¡NUEVAS TÉCNICAS DESBLOQUEADAS!<br>'+newMoves.map(([k,m])=>`<span style="color:var(--text)">${m.name}</span>`).join('<br>')
+    :'';
+  if(newMoves.length>0){activeLoadout=buildDefaultLoadout();saveGame();}
+  const c=document.getElementById('card-player');
+  c.classList.add('level-up');setTimeout(()=>c.classList.remove('level-up'),700);
+  document.getElementById('beltup-overlay').classList.add('show');
+  updateBeltUI();renderPanel();
+}
+function closeBeltUp(){
+  document.getElementById('beltup-overlay').classList.remove('show');
+  if(beltUpFromVictory){
+    startNewCombat();
+  } else {
+    // Belt-up happened mid-combat: continue with enemy turn
+    doEnemyTurn();
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// TECHNIQUE TREE
+// ══════════════════════════════════════════════════════
+function showTree(){
+  const content=document.getElementById('tree-content');content.innerHTML='';
+  BELTS.forEach((belt,bi)=>{
+    const moves=Object.entries(ALL_MOVES).filter(([k,m])=>m.beltReq===bi);
+    if(!moves.length)return;
+    const sec=document.createElement('div');sec.className='tree-belt';
+    sec.innerHTML=`<div class="tree-belt-label">
+      <div class="tree-belt-dot" style="background:${belt.color}"></div>
+      ${belt.kyu}º KYU · ${belt.name}${bi===PROGRESS.beltIndex?' ← actual':''}
+    </div>
+    <div class="tree-techs">${moves.map(([k,m])=>{
+      const u=m.beltReq<=PROGRESS.beltIndex;
+      const rows=SABAKI.map(s=>{const c=COMPAT_LEVELS[SABAKI_COMPAT[s.key]?.[k]??1];return`<td class="compat-${c.cls}">${c.symbol}</td>`;}).join('');
+      return`<div class="tree-tech${u?' unlocked':''}">
+        <div class="tree-tech-name">${m.name}</div>
+        <div class="tree-tech-desc">${m.desc}</div>
+        <table class="compat-table"><tr><th>IRIMI</th><th>TENKAN</th><th>TENSHI</th><th>PIVOT</th></tr><tr>${rows}</tr></table>
+        <div class="tree-tech-badge ${u?'u':'l'}">${u?'✓ Desbloqueada':'🔒 Req. '+belt.kyu+'º Kyu'}</div>
+      </div>`;
+    }).join('')}</div>`;
+    content.appendChild(sec);
+  });
+  document.getElementById('tree-overlay').classList.add('show');
+}
+function closeTree(){document.getElementById('tree-overlay').classList.remove('show');}
+
+// ══════════════════════════════════════════════════════
+// START / RESET
+// ══════════════════════════════════════════════════════
+function startNewCombat(){
+  if(typingTimer){clearTimeout(typingTimer);typingTimer=null;}
+  msgQueue=[];pendingConfirm=null;waitingConfirm=false;pendingBeltUp=false;qRunning=false;
+  showArrow(false);
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('sabaki-chosen').classList.remove('show');
+  resetCombatState();updateBaseUI();renderPanel();
+  phase='waiting';qRunning=false;
+  enq({
+    text:`¡Combate comienza! ${ENEMY.name} te desafía.`,
+    snap:snap(),
+    cb:()=>beginPlayerTurn()
+  });
+  flush();
+}
+
+// ══════════════════════════════════════════════════════
+// BETA TESTER PANEL
+// ══════════════════════════════════════════════════════
+function betaPanel(){
+  document.getElementById('beta-overlay').classList.add('show');
+  document.getElementById('storage-status').textContent=HAS_STORAGE?'💾 localStorage: activo':'⚠ localStorage: no disponible (sandbox)';
+  document.getElementById('storage-status').style.color=HAS_STORAGE?'var(--ki)':'var(--accent)';
+}
+function closeBetaPanel(){document.getElementById('beta-overlay').classList.remove('show');}
+
+function betaAddExp(){
+  closeBetaPanel();
+  const bu=gainExp(50);updateBeltUI();
+  if(bu){showBeltUp(false);return;}
+  // Show feedback in log
+  const prev=phase;phase='waiting';qRunning=false;
+  enq({text:`[BETA] +50 EXP añadidos. Total: ${PROGRESS.exp} / ${getCurrentBelt().exp}`,dim:true,cb:()=>{phase=prev;renderPanel();}});
+  flush();
+}
+
+function betaNextBelt(){
+  closeBetaPanel();
+  if(PROGRESS.beltIndex>=BELTS.length-1){
+    const prev=phase;phase='waiting';qRunning=false;
+    enq({text:'[BETA] Ya estás en el cinturón máximo.',dim:true,cb:()=>{phase=prev;renderPanel();}});
+    flush();return;
+  }
+  PROGRESS={beltIndex:PROGRESS.beltIndex+1,exp:0,totalExp:PROGRESS.totalExp};
+  saveGame();updateBeltUI();showBeltUp(false);
+}
+
+function betaResetAll(){
+  if(!confirm('¿Resetear TODO a cero?\n· Cinturón → 7º KYU Blanco\n· EXP → 0\n· Oponente → KENZAN\n· Técnicas → inicio'))return;
+
+  // Stop everything running
+  if(typingTimer){clearTimeout(typingTimer);typingTimer=null;}
+  msgQueue=[];pendingConfirm=null;waitingConfirm=false;skipTyping=false;qRunning=false;
+  pendingBeltUp=false;beltUpFromVictory=false;
+
+  // Replace PROGRESS with a brand new object
+  PROGRESS={beltIndex:0,exp:0,totalExp:0};
+  activeLoadout=['ikkyo','kokyu','ki_charge','kote'];
+
+  // Clear storage then start fresh
+  clearSave().then(()=>{
+    ['overlay','beltup-overlay','tree-overlay','beta-overlay'].forEach(id=>
+      document.getElementById(id).classList.remove('show')
+    );
+    startNewCombat();
+  });
+}
+
+function showHelp(){
+  if(phase==='waiting'&&qRunning)return;
+  const prev=phase;phase='waiting';qRunning=false;
+  enq({
+    text:'Cada turno: 1) El enemigo anuncia su ataque. 2) Elige TAI SABAKI (entrada). 3) Elige la técnica — el símbolo ◎✦○✗ indica la compatibilidad. Si fallas (✗) hay % de fallo y no gastas Ki. Ki Focus siempre funciona. El progreso se guarda automáticamente.',
+    cb:()=>{phase=prev;renderPanel();}
+  });
+  flush();
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+loadGame().then(()=>startNewCombat());
+</script>
+</body>
+</html>
