@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aikido: El Camino de la Armonía — v0.06</title>
+<meta name="robots" content="noindex, nofollow">
+<title>Aikido: El Camino de la Armonía — v0.07</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
 :root{
@@ -13,17 +14,18 @@
   --opt:#a8d8b0;--good:#c8a96e;--neut:#7a7a9a;--bad:#e07070;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px 12px 32px;background-image:radial-gradient(ellipse 60% 40% at 20% 80%,rgba(126,184,200,.04) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 20%,rgba(200,169,110,.05) 0%,transparent 60%);}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px 12px 32px;background-image:radial-gradient(ellipse 60% 40% at 20% 80%,rgba(126,184,200,.04) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 20%,rgba(200,169,110,.05) 0%,transparent 60%);}
 .title-bar{text-align:center;margin-bottom:10px;}
 .title-bar h1{font-family:'Noto Serif JP',serif;font-size:clamp(1rem,3vw,1.4rem);letter-spacing:.3em;color:var(--accent);text-shadow:0 0 24px rgba(200,169,110,.4);}
 .title-bar p{font-size:.65rem;letter-spacing:.2em;color:var(--text-dim);margin-top:2px;}
-.belt-row{width:100%;max-width:680px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:7px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.belt-row{width:100%;max-width:680px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:7px 14px;display:flex;align-items:center;gap:10px;margin-bottom:4px;}
 .belt-icon{width:18px;height:10px;border-radius:2px;flex-shrink:0;border:1px solid rgba(255,255,255,.15);}
 .belt-label{font-size:.7rem;letter-spacing:.15em;color:var(--accent);font-family:'Noto Serif JP',serif;flex-shrink:0;}
 .belt-kyu{font-size:.6rem;color:var(--text-dim);flex-shrink:0;}
 .exp-track{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
 .exp-fill{height:100%;background:linear-gradient(90deg,#b080d0,#d4a0e0);border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);}
 .exp-val{font-size:.6rem;color:var(--exp);width:72px;text-align:right;flex-shrink:0;}
+.record-row{width:100%;max-width:680px;display:flex;justify-content:flex-end;gap:14px;font-size:.58rem;letter-spacing:.1em;margin-bottom:4px;padding:0 4px;}
 .arena{width:100%;max-width:680px;display:flex;flex-direction:column;gap:8px;}
 .fighters-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;}
 .fighter-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 12px;position:relative;overflow:hidden;}
@@ -48,6 +50,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .tag.stunned{background:rgba(224,112,112,.2);color:var(--hp);}
 .tag.arm_down{background:rgba(200,169,110,.2);color:var(--accent);}
 .stats-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.fighter-card.enemy .stats-row{justify-content:flex-end;}
 .stat-chip{font-size:.58rem;padding:1px 6px;border:1px solid var(--border);border-radius:3px;color:var(--text-dim);}
 .stat-chip span{color:var(--text);font-weight:700;}
 /* LOG */
@@ -113,7 +116,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .btn.primary:hover{background:rgba(200,169,110,.15);}
 .flash{position:fixed;inset:0;pointer-events:none;opacity:0;background:rgba(200,169,110,.07);transition:opacity .2s;}
 .flash.active{opacity:1;}
-/* OVERLAYS */
+/* BASE OVERLAYS */
 .overlay{display:none;position:fixed;inset:0;background:rgba(10,10,15,.93);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:12px;}
 .overlay.show{display:flex;}
 .overlay h2{font-family:'Noto Serif JP',serif;font-size:1.8rem;letter-spacing:.3em;color:var(--accent);text-shadow:0 0 32px rgba(200,169,110,.5);}
@@ -122,6 +125,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .belt-up-box .new-belt{width:60px;height:20px;border-radius:4px;margin:12px auto;border:2px solid rgba(255,255,255,.2);}
 .belt-up-box h3{font-family:'Noto Serif JP',serif;font-size:1rem;letter-spacing:.2em;color:var(--accent);}
 .belt-up-box .unlocked{font-size:.68rem;color:var(--exp);margin-top:10px;letter-spacing:.08em;line-height:1.6;}
+/* TREE / SCROLLABLE OVERLAYS */
 .tree-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,15,.96);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
 .tree-overlay.show{display:flex;}
 .tree-box{width:100%;max-width:660px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;}
@@ -135,14 +139,39 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .tree-tech-name{font-size:.74rem;font-weight:700;color:var(--text-dim);}
 .tree-tech.unlocked .tree-tech-name{color:var(--text);}
 .tree-tech-desc{font-size:.57rem;color:var(--text-dim);margin-top:2px;line-height:1.35;}
+.tree-tech-meta{font-size:.52rem;color:var(--text-dim);margin-top:2px;}
+.tree-tech-meta span{color:var(--accent);}
 .tree-tech-badge{font-size:.52rem;margin-top:3px;}
 .tree-tech-badge.u{color:var(--ki);}
 .tree-tech-badge.l{color:var(--exp);}
 .compat-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:.52rem;}
 .compat-table th{color:var(--text-dim);font-weight:400;padding:2px 4px;text-align:center;letter-spacing:.06em;}
 .compat-table td{text-align:center;padding:2px 4px;}
-/* waiting panel */
+/* WAITING */
 .waiting-msg{padding:14px;font-size:.72rem;color:var(--text-dim);text-align:center;letter-spacing:.12em;}
+/* CUSTOM CONFIRM */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(10,10,15,.95);z-index:400;align-items:center;justify-content:center;}
+.confirm-overlay.show{display:flex;}
+.confirm-box{background:var(--panel);border:1px solid #e07070;border-radius:12px;padding:24px 28px;max-width:320px;width:100%;text-align:center;}
+.confirm-msg{font-size:.72rem;color:var(--text);line-height:1.7;margin-bottom:16px;white-space:pre-line;}
+.confirm-btns{display:flex;gap:8px;}
+.confirm-btns .btn{flex:1;}
+/* HELP */
+.help-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 24px;max-width:400px;width:100%;max-height:75vh;overflow-y:auto;}
+.help-box h2{font-family:'Noto Serif JP',serif;font-size:1rem;letter-spacing:.2em;color:var(--accent);margin-bottom:14px;}
+.help-section{margin-bottom:12px;}
+.help-section h4{font-size:.65rem;letter-spacing:.15em;color:var(--accent2);margin-bottom:4px;}
+.help-section p{font-size:.63rem;color:var(--text-dim);line-height:1.65;}
+/* LOADOUT EDITOR */
+.lc-choice{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;cursor:pointer;transition:all .15s;user-select:none;}
+.lc-choice:hover{border-color:rgba(200,169,110,.4);background:rgba(200,169,110,.03);}
+.lc-choice.lc-selected{border-color:rgba(168,216,176,.6);background:rgba(168,216,176,.04);}
+.lc-name{font-size:.74rem;font-weight:700;color:var(--text-dim);}
+.lc-choice.lc-selected .lc-name{color:var(--text);}
+.lc-desc{font-size:.57rem;color:var(--text-dim);margin-top:2px;line-height:1.35;}
+.lc-status{font-size:.52rem;margin-top:3px;color:var(--text-dim);}
+.lc-choice.lc-selected .lc-status{color:var(--ki);}
+/* ANIMATIONS */
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .shake{animation:shake .35s ease;}
 @keyframes levelUp{0%{transform:scale(1);box-shadow:none;}50%{transform:scale(1.03);box-shadow:0 0 20px rgba(200,169,110,.4);}100%{transform:scale(1);box-shadow:none;}}
@@ -153,7 +182,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 <div class="flash" id="flash"></div>
 <div class="title-bar">
   <h1>合気道 · AIKIDO</h1>
-  <p>EL CAMINO DE LA ARMONÍA &nbsp;·&nbsp; <span style="color:var(--accent);opacity:.6;">v0.06</span></p>
+  <p>EL CAMINO DE LA ARMONÍA &nbsp;·&nbsp; <span id="ver-tag" style="color:var(--accent);opacity:.6;">v0.07</span></p>
 </div>
 <div class="belt-row">
   <div class="belt-icon" id="belt-icon"></div>
@@ -161,6 +190,10 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
   <span class="belt-kyu" id="belt-kyu">BLANCO</span>
   <div class="exp-track"><div class="exp-fill" id="exp-fill" style="width:0%"></div></div>
   <span class="exp-val" id="exp-val">0 / 60 EXP</span>
+</div>
+<div class="record-row">
+  <span id="record-wins" style="color:var(--ki);">V: 0</span>
+  <span id="record-losses" style="color:var(--hp);">D: 0</span>
 </div>
 <div class="arena">
   <div class="fighters-row">
@@ -178,6 +211,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
       <div class="fighter-sprite" id="enemy-sprite">👤</div>
       <div class="stat-row"><span class="stat-label">HP</span><div class="bar-track"><div class="bar-fill hp" id="bar-enemy-hp" style="width:100%"></div></div><span class="stat-val" id="val-enemy-hp">90/90</span></div>
       <div class="stat-row"><span class="stat-label">KI</span><div class="bar-track"><div class="bar-fill ki" id="bar-enemy-ki" style="width:100%"></div></div><span class="stat-val" id="val-enemy-ki">40/40</span></div>
+      <div class="stats-row" id="enemy-chips"></div>
       <div class="status-tags" id="tags-enemy"></div>
     </div>
   </div>
@@ -192,6 +226,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
       <div style="display:flex;gap:6px;align-items:center;">
         <span class="panel-phase" id="panel-phase"></span>
         <button class="btn" style="padding:2px 10px;font-size:.56rem;" onclick="showTree()">🌿 ÁRBOL</button>
+        <button class="btn" style="padding:2px 10px;font-size:.56rem;" onclick="showLoadout()">⚙ CARGAR</button>
       </div>
     </div>
     <div class="sabaki-chosen" id="sabaki-chosen"></div>
@@ -199,16 +234,15 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
   </div>
   <div class="bottom-bar">
     <button class="btn" onclick="showHelp()">? AYUDA</button>
-    <button class="btn" onclick="betaPanel()" style="font-size:.6rem;color:#e07070;border-color:#3a1a1a;">🧪 BETA</button>
     <button class="btn primary" onclick="startNewCombat()">↺ NUEVO COMBATE</button>
   </div>
 </div>
 
-<!-- Beta tester panel -->
+<!-- Dev panel — F2 to open, not visible in UI -->
 <div class="overlay" id="beta-overlay">
   <div style="background:var(--panel);border:1px solid #e07070;border-radius:12px;padding:24px 28px;max-width:340px;width:100%;">
-    <div style="font-family:'Noto Serif JP',serif;font-size:.9rem;letter-spacing:.2em;color:#e07070;margin-bottom:14px;">🧪 PANEL BETA TESTER</div>
-    <div style="font-size:.65rem;color:var(--text-dim);margin-bottom:16px;line-height:1.6;">Herramientas de prueba. Solo para desarrollo.<br><span id="storage-status" style="font-size:.6rem;"></span></div>
+    <div style="font-family:'Noto Serif JP',serif;font-size:.9rem;letter-spacing:.2em;color:#e07070;margin-bottom:14px;">🧪 PANEL DEV</div>
+    <div style="font-size:.65rem;color:var(--text-dim);margin-bottom:16px;line-height:1.6;">Herramientas de desarrollo.<br><span id="storage-status" style="font-size:.6rem;"></span></div>
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button class="btn" onclick="betaAddExp()" style="text-align:left;">+ Añadir 50 EXP</button>
       <button class="btn" onclick="betaNextBelt()" style="text-align:left;">⬆ Subir cinturón directo</button>
@@ -218,13 +252,15 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
   </div>
 </div>
 
-<!-- Overlays -->
+<!-- Win / Loss overlay -->
 <div class="overlay" id="overlay">
   <h2 id="overlay-title"></h2>
   <p id="overlay-sub"></p>
   <p id="overlay-exp" style="color:var(--exp);margin-top:4px;font-size:.75rem;"></p>
   <button class="btn primary" onclick="overlayNext()" style="margin-top:12px" id="overlay-btn">SIGUIENTE</button>
 </div>
+
+<!-- Belt-up overlay -->
 <div class="overlay" id="beltup-overlay">
   <div class="belt-up-box">
     <h3>¡ASCENSO DE CINTURÓN!</h3>
@@ -232,9 +268,12 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
     <div id="beltup-title" style="font-family:'Noto Serif JP',serif;font-size:1.3rem;letter-spacing:.2em;color:var(--accent);margin-top:4px;"></div>
     <div id="beltup-kyu" style="font-size:.68rem;color:var(--text-dim);letter-spacing:.15em;margin-top:2px;"></div>
     <div class="unlocked" id="beltup-unlocked"></div>
+    <div style="font-size:.6rem;color:var(--text-dim);margin-top:8px;letter-spacing:.08em;">Usa ⚙ CARGAR para elegir tus técnicas</div>
     <button class="btn primary" onclick="closeBeltUp()" style="margin-top:16px">¡CONTINUAR!</button>
   </div>
 </div>
+
+<!-- Technique tree overlay -->
 <div class="tree-overlay" id="tree-overlay">
   <div class="tree-box">
     <h2>🌿 ÁRBOL DE TÉCNICAS</h2>
@@ -243,11 +282,65 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
   </div>
 </div>
 
+<!-- Loadout editor overlay -->
+<div class="tree-overlay" id="loadout-overlay">
+  <div class="tree-box">
+    <h2>⚙ CARGA DE TÉCNICAS</h2>
+    <div style="font-size:.62rem;color:var(--text-dim);margin-bottom:12px;letter-spacing:.08em;">Selecciona exactamente 4 técnicas activas</div>
+    <div id="loadout-grid" class="tree-techs"></div>
+    <div style="margin-top:10px;font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;">Seleccionadas: <span id="loadout-count" style="color:var(--accent);">0</span> / 4</div>
+    <button class="btn primary" id="loadout-confirm-btn" onclick="confirmLoadout()" style="margin-top:12px;width:100%;" disabled>CONFIRMAR CARGA</button>
+    <button class="btn" onclick="closeLoadout()" style="margin-top:8px;width:100%;">CANCELAR</button>
+  </div>
+</div>
+
+<!-- Help overlay -->
+<div class="overlay" id="help-overlay" style="z-index:200;">
+  <div class="help-box">
+    <h2>? CÓMO JUGAR</h2>
+    <div class="help-section">
+      <h4>FLUJO DE COMBATE</h4>
+      <p>1. El enemigo anuncia su ataque<br>2. Elige tu TAI SABAKI (entrada defensiva)<br>3. Elige la técnica a ejecutar</p>
+    </div>
+    <div class="help-section">
+      <h4>COMPATIBILIDADES ◎ ✦ ○ ✗</h4>
+      <p>◎ Óptimo: ×1.5 daño y EXP, sin fallo<br>✦ Bueno: daño y EXP normales, 5% fallo<br>○ Neutro: daño reducido, 15% fallo<br>✗ Malo: daño mínimo, 35% de fallo</p>
+    </div>
+    <div class="help-section">
+      <h4>KI Y REGENERACIÓN</h4>
+      <p>Las técnicas gastan Ki. Recuperas Ki cada turno — más Ki por cinturón alto. Ki Focus siempre funciona y recupera 20 Ki directamente.</p>
+    </div>
+    <div class="help-section">
+      <h4>PROGRESIÓN Y CARGAS</h4>
+      <p>Gana EXP ejecutando técnicas (victorias +20 EXP, derrotas +5 EXP). Al subir cinturón el enemigo se vuelve más difícil. Usa ⚙ CARGAR para elegir tus 4 técnicas activas.</p>
+    </div>
+    <button class="btn primary" onclick="closeHelp()" style="width:100%;margin-top:4px;">ENTENDIDO</button>
+  </div>
+</div>
+
+<!-- Custom confirm — replaces native confirm() blocked in cross-origin iframes -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn" onclick="confirmNo()" style="color:#e07070;">CANCELAR</button>
+      <button class="btn primary" onclick="confirmYes()">CONFIRMAR</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ══════════════════════════════════════════════════════
+// STORAGE DETECTION  (fixes HAS_STORAGE undefined + iframe localStorage block)
+// ══════════════════════════════════════════════════════
+const HAS_STORAGE=(()=>{
+  try{localStorage.setItem('_aik_t','1');localStorage.removeItem('_aik_t');return true;}
+  catch(e){return false;}
+})();
+
 // ══════════════════════════════════════════════════════
 // COMPATIBILITY TABLES
 // ══════════════════════════════════════════════════════
-// 3=óptimo 2=bueno 1=neutro 0=malo
 const SABAKI_COMPAT={
   irimi: {ikkyo:2,kokyu:1,ki_charge:1,kote:2,nikyo:1,irimi_nage:3,sankyo:2,kaiten:1,yonkyo:1,tenchi:3},
   tenkan:{ikkyo:3,kokyu:3,ki_charge:1,kote:1,nikyo:1,irimi_nage:0,sankyo:1,kaiten:3,yonkyo:2,tenchi:0},
@@ -304,8 +397,6 @@ const BELTS=[
 // ══════════════════════════════════════════════════════
 // TECHNIQUES
 // ══════════════════════════════════════════════════════
-// execute returns {msg, shake?, failed?}
-// Ki cost is deducted ONLY if technique does not fail
 const ALL_MOVES={
   ikkyo:{
     name:'一教 IKKYŌ',type:'control',kiCost:0,expGain:8,beltReq:0,
@@ -330,7 +421,6 @@ const ALL_MOVES={
     name:'気 KI FOCUS',type:'ki',kiCost:0,expGain:5,beltReq:0,
     desc:'Concentra tu energía. Recupera 20 Ki.',
     execute(a,d,c){
-      // Always works regardless of compat
       const g=20;a.ki=Math.min(a.maxKi,a.ki+g);snd('ki_charge');
       return{msg:`${a.name} concentra su KI — recupera ${g} de energía.`};
     }
@@ -410,35 +500,31 @@ const ALL_MOVES={
 };
 
 // ══════════════════════════════════════════════════════
-// SAVE / LOAD  (window.storage for sandbox, localStorage fallback)
+// SAVE / LOAD  (sync — removed window.storage dependency)
 // ══════════════════════════════════════════════════════
-const SAVE_KEY='aikido_save_v5';
-let PROGRESS={beltIndex:0,exp:0,totalExp:0};
+const SAVE_KEY='aikido_save_v6';
+let PROGRESS={beltIndex:0,exp:0,totalExp:0,wins:0,losses:0};
 let activeLoadout=['ikkyo','kokyu','ki_charge','kote'];
 
-async function saveGame(){
-  const data=JSON.stringify({beltIndex:PROGRESS.beltIndex,exp:PROGRESS.exp,totalExp:PROGRESS.totalExp,loadout:activeLoadout});
+function saveGame(){
+  if(!HAS_STORAGE)return;
   try{
-    if(window.storage){await window.storage.set(SAVE_KEY,data);}
-    else{localStorage.setItem(SAVE_KEY,data);}
+    localStorage.setItem(SAVE_KEY,JSON.stringify({
+      beltIndex:PROGRESS.beltIndex,exp:PROGRESS.exp,totalExp:PROGRESS.totalExp,
+      wins:PROGRESS.wins,losses:PROGRESS.losses,loadout:activeLoadout
+    }));
   }catch(e){}
 }
-
-async function loadGame(){
+function loadGame(){
+  if(!HAS_STORAGE)return;
   try{
-    let raw=null;
-    if(window.storage){
-      const r=await window.storage.get(SAVE_KEY);
-      raw=r?r.value:null;
-    }else{
-      raw=localStorage.getItem(SAVE_KEY);
-    }
+    const raw=localStorage.getItem(SAVE_KEY);
     if(!raw)return;
     const d=JSON.parse(raw);
     PROGRESS={
       beltIndex:Math.min(d.beltIndex||0,BELTS.length-1),
-      exp:d.exp||0,
-      totalExp:d.totalExp||0
+      exp:d.exp||0,totalExp:d.totalExp||0,
+      wins:d.wins||0,losses:d.losses||0
     };
     if(Array.isArray(d.loadout)&&d.loadout.length===4){
       const u=getUnlockedKeys();
@@ -447,23 +533,17 @@ async function loadGame(){
     }
   }catch(e){}
 }
-
-async function clearSave(){
-  try{
-    if(window.storage){await window.storage.delete(SAVE_KEY);}
-    else{localStorage.removeItem(SAVE_KEY);}
-  }catch(e){}
+function clearSave(){
+  if(!HAS_STORAGE)return;
+  try{localStorage.removeItem(SAVE_KEY);}catch(e){}
 }
 function getUnlockedKeys(){return Object.keys(ALL_MOVES).filter(k=>ALL_MOVES[k].beltReq<=PROGRESS.beltIndex);}
 function buildDefaultLoadout(){
-  // ki_charge is always pinned in the loadout (available at all ranks)
   const others=Object.keys(ALL_MOVES).filter(k=>k!=='ki_charge'&&ALL_MOVES[k].beltReq<=PROGRESS.beltIndex);
-  // Take the 3 most advanced unlocked techniques + ki_charge
   const pick=others.slice(-3);
-  // Pad with base moves if fewer than 3 unlocked others
   const base=['ikkyo','kokyu','kote'];
   const padded=[...new Set([...pick,...base])].filter(k=>k!=='ki_charge').slice(0,3);
-  return [...padded,'ki_charge'];
+  return[...padded,'ki_charge'];
 }
 
 // ══════════════════════════════════════════════════════
@@ -486,23 +566,27 @@ function updateBeltUI(){
   document.getElementById('exp-fill').style.width=(maxed?100:Math.min(100,(PROGRESS.exp/belt.exp)*100))+'%';
   document.getElementById('exp-val').textContent=maxed?'MAESTRO':`${PROGRESS.exp} / ${belt.exp} EXP`;
 }
+function updateRecordUI(){
+  document.getElementById('record-wins').textContent=`V: ${PROGRESS.wins}`;
+  document.getElementById('record-losses').textContent=`D: ${PROGRESS.losses}`;
+}
 
 // ══════════════════════════════════════════════════════
 // GAME STATE
 // ══════════════════════════════════════════════════════
+// 7 enemies — one per belt, scaling progressively
 const ENEMY_ROSTER=[
-  {name:'KENZAN', hp:90, ki:40,atk:20,arm:15,sprite:'👤'},
-  {name:'RYOUTA', hp:105,ki:50,atk:23,arm:18,sprite:'🥷'},
-  {name:'SENSEI', hp:125,ki:60,atk:27,arm:23,sprite:'👘'},
+  {name:'KENZAN',   hp:90,  ki:40, atk:20,arm:15,sprite:'👤'},
+  {name:'RYOUTA',   hp:110, ki:50, atk:24,arm:19,sprite:'🥷'},
+  {name:'GOTO',     hp:135, ki:62, atk:29,arm:25,sprite:'⛩'},
+  {name:'KUROSAKI', hp:160, ki:76, atk:35,arm:31,sprite:'🎎'},
+  {name:'HAYASHI',  hp:195, ki:92, atk:43,arm:39,sprite:'🌊'},
+  {name:'TAKEDA',   hp:235, ki:112,atk:53,arm:48,sprite:'🔥'},
+  {name:'O-SENSEI', hp:285, ki:135,atk:65,arm:60,sprite:'☯'},
 ];
 let PLAYER={name:'TAKESHI',hp:80,maxHp:80,ki:50,maxKi:50,atk:18,arm:22,statuses:[]};
 let ENEMY={};
 let turn=1,isPlayerTurn=true;
-
-// Phase: 'waiting'|'sabaki'|'technique'
-// 'waiting' = log message running, buttons hidden
-// 'sabaki'  = show sabaki grid, player can click
-// 'technique' = show technique grid, player can click
 let phase='waiting';
 let chosenSabaki=null;
 let chosenAttack=null;
@@ -558,10 +642,8 @@ function snd(t){
 // ══════════════════════════════════════════════════════
 let msgQueue=[],typingTimer=null,waitingConfirm=false,skipTyping=false,pendingConfirm=null,qRunning=false;
 const TSPEED=26;
-
 function enq(e){msgQueue.push(e);}
 function flush(){if(!qRunning){qRunning=true;nextMsg();}}
-
 function nextMsg(){
   if(msgQueue.length===0){qRunning=false;waitingConfirm=false;showArrow(false);renderPanel();return;}
   const e=msgQueue.shift();
@@ -573,12 +655,10 @@ function nextMsg(){
     pendingConfirm=()=>{waitingConfirm=false;showArrow(false);if(e.cb)e.cb();nextMsg();};
   });
 }
-
 function onLogClick(){
   if(typingTimer!==null){skipTyping=true;return;}
   if(waitingConfirm&&pendingConfirm)pendingConfirm();
 }
-
 function typewrite(text,dim,onDone){
   skipTyping=false;
   const el=document.getElementById('log-text');
@@ -607,13 +687,14 @@ function pickRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
 // UI SNAPSHOT
 // ══════════════════════════════════════════════════════
 function snap(){
-  return{pHp:PLAYER.hp,pKi:PLAYER.ki,eHp:ENEMY.hp,eKi:ENEMY.ki,
+  return{pHp:PLAYER.hp,pKi:PLAYER.ki,eHp:ENEMY.hp,eKi:ENEMY.ki,eArm:ENEMY.arm,
     pSt:[...PLAYER.statuses],eSt:[...ENEMY.statuses]};
 }
 function applySnap(s){
   setBar('player','hp',s.pHp,PLAYER.maxHp);setBar('player','ki',s.pKi,PLAYER.maxKi);
   setBar('enemy','hp',s.eHp,ENEMY.maxHp);setBar('enemy','ki',s.eKi,ENEMY.maxKi);
   renderTagsRaw('tags-player',s.pSt);renderTagsRaw('tags-enemy',s.eSt);
+  updateEnemyChips(s.eArm);
   document.getElementById('turn-indicator').textContent=`TURNO ${turn} · ${isPlayerTurn?'JUGADOR':'ENEMIGO'}`;
 }
 
@@ -633,24 +714,25 @@ function renderTagsRaw(id,statuses){
     return'';
   }).join('');
 }
-
+function updateEnemyChips(arm){
+  const a=(arm!==undefined)?arm:ENEMY.arm;
+  document.getElementById('enemy-chips').innerHTML=
+    `<div class="stat-chip">ATQ <span>${ENEMY.atk}</span></div><div class="stat-chip">ARM <span>${a}</span></div>`;
+}
 function renderPanel(){
   const content=document.getElementById('panel-content');
   const title=document.getElementById('panel-title');
   const phaseEl=document.getElementById('panel-phase');
   const strip=document.getElementById('sabaki-chosen');
-
   if(phase==='waiting'){
     title.textContent='—';phaseEl.textContent='';strip.classList.remove('show');
-    content.innerHTML='<div class="waiting-msg">…</div>';
-    return;
+    content.innerHTML='<div class="waiting-msg">…</div>';return;
   }
   if(phase==='sabaki'){
     title.textContent='TAI SABAKI — ELIGE TU ENTRADA';
     phaseEl.textContent='FASE 1 / 2';
     strip.classList.remove('show');
-    renderSabakiGrid(content);
-    return;
+    renderSabakiGrid(content);return;
   }
   if(phase==='technique'){
     title.textContent='ELIGE UNA TÉCNICA';
@@ -662,7 +744,6 @@ function renderPanel(){
     renderTechGrid(content);
   }
 }
-
 function renderSabakiGrid(container){
   const grid=document.createElement('div');grid.className='sabaki-grid';
   SABAKI.forEach(s=>{
@@ -678,14 +759,12 @@ function renderSabakiGrid(container){
   });
   container.innerHTML='';container.appendChild(grid);
 }
-
 function renderTechGrid(container){
   const grid=document.createElement('div');grid.className='moves-grid';
   activeLoadout.forEach(key=>{
     const m=ALL_MOVES[key];if(!m)return;
     const unlocked=m.beltReq<=PROGRESS.beltIndex;
     const compat=getCompat(chosenSabaki,key,chosenAttack);
-    // Ki Focus always shows base EXP
     const expPreview=key==='ki_charge'?m.expGain:Math.round(m.expGain*compat.expMult);
     const kiLabel=m.kiCost>0?`-${m.kiCost}`:'+0';
     const btn=document.createElement('button');
@@ -704,20 +783,20 @@ function renderTechGrid(container){
   });
   container.innerHTML='';container.appendChild(grid);
 }
-
 function flashScreen(){const f=document.getElementById('flash');f.classList.add('active');setTimeout(()=>f.classList.remove('active'),200);}
 function shakeCard(w){const c=document.getElementById(`card-${w}`);c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');}
-
 function updateBaseUI(){
   setBar('player','hp',PLAYER.hp,PLAYER.maxHp);setBar('player','ki',PLAYER.ki,PLAYER.maxKi);
   setBar('enemy','hp',ENEMY.hp,ENEMY.maxHp);setBar('enemy','ki',ENEMY.ki,ENEMY.maxKi);
   renderTagsRaw('tags-player',PLAYER.statuses);renderTagsRaw('tags-enemy',ENEMY.statuses);
+  updateEnemyChips();
   updateBeltUI();
+  updateRecordUI();
   document.getElementById('turn-indicator').textContent=`TURNO ${turn} · ${isPlayerTurn?'JUGADOR':'ENEMIGO'}`;
 }
 
 // ══════════════════════════════════════════════════════
-// ENEMY AI
+// ENEMY AI  (improved — reacts to redirect, stun, HP thresholds, belt scaling)
 // ══════════════════════════════════════════════════════
 const EMOVES={
   strike:{execute(a,d){
@@ -728,22 +807,39 @@ const EMOVES={
     if(hasStatus(d,'redirect')){removeStatus(d,'redirect');const dmg=Math.max(1,Math.floor(a.atk*1.6));dealDamage(a,dmg);snd('hit');return{msg:`¡REDIRECCIÓN PERFECTA! El golpe vuelve — ${dmg} de daño a ${a.name}.`,shake:'enemy'};}
     const dmg=Math.max(1,Math.floor(a.atk*1.5)-Math.floor(d.arm*.3)+rand(-2,3));dealDamage(d,dmg);snd('hit');return{msg:`${a.name} lanza un GOLPE POTENTE — ${dmg} de daño.`,shake:'player'};
   }},
-  guard:{execute(a,d){a.ki=Math.min(a.maxKi,a.ki+12);return{msg:`${a.name} adopta posición defensiva y recupera Ki.`};}}
+  guard:{execute(a,d){
+    const rec=Math.floor(12+PROGRESS.beltIndex*1.5);
+    a.ki=Math.min(a.maxKi,a.ki+rec);
+    return{msg:`${a.name} adopta posición defensiva y recupera ${rec} Ki.`};
+  }}
 };
-function chooseEnemyMove(){if(ENEMY.ki<10)return'guard';const r=Math.random();return r<.45?'strike':r<.75?'heavy':'guard';}
+function chooseEnemyMove(){
+  if(ENEMY.ki<8)return'guard';
+  // Never use heavy when player has redirect — it will backfire
+  if(hasStatus(PLAYER,'redirect'))return Math.random()<0.65?'guard':'strike';
+  // Press when player is stunned
+  if(hasStatus(PLAYER,'stunned'))return'heavy';
+  // Desperate when near death
+  if(ENEMY.hp/ENEMY.maxHp<0.25)return Math.random()<0.6?'heavy':'strike';
+  // Press advantage when player HP is low
+  if(PLAYER.hp/PLAYER.maxHp<0.3)return Math.random()<0.55?'heavy':'strike';
+  // Scale heavy chance with belt: 25% at kyu7, 43% at kyu1
+  const heavyChance=0.25+Math.min(PROGRESS.beltIndex,6)*0.03;
+  const r=Math.random();
+  if(r<0.45)return'strike';
+  if(r<0.45+heavyChance)return'heavy';
+  return'guard';
+}
 
 // ══════════════════════════════════════════════════════
 // TURN FLOW
 // ══════════════════════════════════════════════════════
-
-// Called to start each player turn: announce enemy attack, then show sabaki
 function beginPlayerTurn(){
   isPlayerTurn=true;
   chosenAttack=pickRandom(ATTACK_TYPES).key;
   chosenSabaki=null;
   const atk=ATTACK_TYPES.find(a=>a.key===chosenAttack);
-  phase='waiting';
-  qRunning=false;
+  phase='waiting';qRunning=false;
   enq({
     text:`${ENEMY.name} lanza un ${atk.name} (${atk.jp}). ¡Elige tu entrada!`,
     snap:snap(),
@@ -751,15 +847,10 @@ function beginPlayerTurn(){
   });
   flush();
 }
-
 function chooseSabaki(key){
   if(phase!=='sabaki')return;
-  chosenSabaki=key;
-  phase='technique';
-  snd('sabaki');
-  renderPanel();
+  chosenSabaki=key;phase='technique';snd('sabaki');renderPanel();
 }
-
 function doPlayerAction(key){
   if(phase!=='technique')return;
   const m=ALL_MOVES[key];
@@ -769,29 +860,18 @@ function doPlayerAction(key){
     enq({text:'⚠ Ki insuficiente para esta técnica.',cb:()=>{phase='technique';renderPanel();}});
     flush();return;
   }
-
   phase='waiting';
   const compat=getCompat(chosenSabaki,key,chosenAttack);
   const result=m.execute(PLAYER,ENEMY,compat);
   const failed=result.failed===true;
-
-  // Only deduct Ki if not already deducted and technique worked (fail = no cost)
-  // NOTE: ki_charge has kiCost=0 always; others deduct only on success
-  if(!failed&&m.kiCost>0){
-    PLAYER.ki=Math.max(0,PLAYER.ki-m.kiCost);
-  }
-
+  if(!failed&&m.kiCost>0){PLAYER.ki=Math.max(0,PLAYER.ki-m.kiCost);}
   if(failed)snd('fail');
-
   const expEarned=failed?0:(key==='ki_charge'?m.expGain:Math.round(m.expGain*compat.expMult));
   const beltedUp=expEarned>0?gainExp(expEarned):false;
   updateBeltUI();
-
   const s=snap();
   qRunning=false;
-  // Message 1: compat line
   enq({text:`[${compat.symbol} ${compat.label}] ${SABAKI.find(x=>x.key===chosenSabaki)?.name||chosenSabaki} + ${m.name}`,dim:true,snap:s});
-  // Message 2: result
   enq({
     text:result.msg+(expEarned>0?`  (+${expEarned} EXP)`:''),
     shake:result.shake,flash:!failed,snap:s,
@@ -803,14 +883,10 @@ function doPlayerAction(key){
   });
   flush();
 }
-
 function doEnemyTurn(){
-  isPlayerTurn=false;
-  phase='waiting';
+  isPlayerTurn=false;phase='waiting';
   document.getElementById('turn-indicator').textContent=`TURNO ${turn} · ENEMIGO`;
-  renderPanel();
-  qRunning=false;
-
+  renderPanel();qRunning=false;
   if(hasStatus(ENEMY,'stunned')){
     removeStatus(ENEMY,'stunned');
     enq({text:`${ENEMY.name} está aturdido y pierde su turno.`,dim:true,snap:snap(),cb:()=>finishTurn()});
@@ -822,17 +898,14 @@ function doEnemyTurn(){
   });
   flush();
 }
-
 function finishTurn(){
   turn++;
-  PLAYER.ki=Math.min(PLAYER.maxKi,PLAYER.ki+5);
-  ENEMY.ki=Math.min(ENEMY.maxKi,ENEMY.ki+5);
+  // Ki regen scales with belt: 5 at kyu7, up to ~10 at kyu1
+  const kiRegen=5+Math.floor(PROGRESS.beltIndex*0.8);
+  PLAYER.ki=Math.min(PLAYER.maxKi,PLAYER.ki+kiRegen);
+  ENEMY.ki=Math.min(ENEMY.maxKi,ENEMY.ki+kiRegen);
   phase='waiting';qRunning=false;
-  enq({
-    text:`— Turno ${turn}. El oponente se prepara.`,
-    dim:true,snap:snap(),
-    cb:()=>beginPlayerTurn()
-  });
+  enq({text:`— Turno ${turn}. El oponente se prepara.`,dim:true,snap:snap(),cb:()=>beginPlayerTurn()});
   flush();
 }
 
@@ -847,6 +920,8 @@ function checkGameOver(){
 }
 function endCombat(won){
   phase='waiting';qRunning=false;renderPanel();
+  PROGRESS[won?'wins':'losses']++;
+  updateRecordUI();
   if(won){
     snd('victory');
     const bonus=20;const bu=gainExp(bonus);updateBeltUI();
@@ -857,11 +932,15 @@ function endCombat(won){
     if(bu)pendingBeltUp=true;
   }else{
     snd('defeat');
+    // Consolation EXP keeps progression moving after losses
+    const consolation=5;const bu=gainExp(consolation);updateBeltUI();
     document.getElementById('overlay-title').textContent='☯ DERROTA';
     document.getElementById('overlay-sub').textContent='El camino es largo. Vuelve a intentarlo.';
-    document.getElementById('overlay-exp').textContent='';
+    document.getElementById('overlay-exp').textContent=`+${consolation} EXP por combate`;
     document.getElementById('overlay-btn').textContent='INTENTAR DE NUEVO';
+    if(bu)pendingBeltUp=true;
   }
+  saveGame();
   document.getElementById('overlay').classList.add('show');
 }
 function overlayNext(){
@@ -874,7 +953,6 @@ function overlayNext(){
 // BELT UP
 // ══════════════════════════════════════════════════════
 let beltUpFromVictory=false;
-
 function showBeltUp(fromVictory=false){
   beltUpFromVictory=fromVictory;
   phase='waiting';qRunning=false;
@@ -883,10 +961,13 @@ function showBeltUp(fromVictory=false){
   document.getElementById('beltup-title').textContent=belt.name;
   document.getElementById('beltup-kyu').textContent=`${belt.kyu}º KYU`;
   const newMoves=Object.entries(ALL_MOVES).filter(([k,m])=>m.beltReq===PROGRESS.beltIndex);
-  document.getElementById('beltup-unlocked').innerHTML=newMoves.length>0
-    ?'¡NUEVAS TÉCNICAS DESBLOQUEADAS!<br>'+newMoves.map(([k,m])=>`<span style="color:var(--text)">${m.name}</span>`).join('<br>')
-    :'';
-  if(newMoves.length>0){activeLoadout=buildDefaultLoadout();saveGame();}
+  if(newMoves.length>0){
+    document.getElementById('beltup-unlocked').innerHTML=
+      '¡NUEVAS TÉCNICAS DESBLOQUEADAS!<br>'+newMoves.map(([k,m])=>`<span style="color:var(--text)">${m.name}</span>`).join('<br>');
+    activeLoadout=buildDefaultLoadout();saveGame();
+  }else{
+    document.getElementById('beltup-unlocked').innerHTML='';
+  }
   const c=document.getElementById('card-player');
   c.classList.add('level-up');setTimeout(()=>c.classList.remove('level-up'),700);
   document.getElementById('beltup-overlay').classList.add('show');
@@ -894,16 +975,11 @@ function showBeltUp(fromVictory=false){
 }
 function closeBeltUp(){
   document.getElementById('beltup-overlay').classList.remove('show');
-  if(beltUpFromVictory){
-    startNewCombat();
-  } else {
-    // Belt-up happened mid-combat: continue with enemy turn
-    doEnemyTurn();
-  }
+  if(beltUpFromVictory){startNewCombat();}else{doEnemyTurn();}
 }
 
 // ══════════════════════════════════════════════════════
-// TECHNIQUE TREE
+// TECHNIQUE TREE  (improved: Ki cost, EXP gain, best sabaki per technique)
 // ══════════════════════════════════════════════════════
 function showTree(){
   const content=document.getElementById('tree-content');content.innerHTML='';
@@ -917,11 +993,23 @@ function showTree(){
     </div>
     <div class="tree-techs">${moves.map(([k,m])=>{
       const u=m.beltReq<=PROGRESS.beltIndex;
-      const rows=SABAKI.map(s=>{const c=COMPAT_LEVELS[SABAKI_COMPAT[s.key]?.[k]??1];return`<td class="compat-${c.cls}">${c.symbol}</td>`;}).join('');
+      const sabakiRows=SABAKI.map(s=>{
+        const c=COMPAT_LEVELS[SABAKI_COMPAT[s.key]?.[k]??1];
+        return`<td class="compat-${c.cls}">${c.symbol}</td>`;
+      }).join('');
+      const bestSabaki=SABAKI.reduce((best,s)=>{
+        return(SABAKI_COMPAT[s.key]?.[k]??1)>(SABAKI_COMPAT[best.key]?.[k]??1)?s:best;
+      },SABAKI[0]);
+      const kiLabel=m.kiCost>0?`-${m.kiCost} Ki`:'Sin Ki';
       return`<div class="tree-tech${u?' unlocked':''}">
         <div class="tree-tech-name">${m.name}</div>
         <div class="tree-tech-desc">${m.desc}</div>
-        <table class="compat-table"><tr><th>IRIMI</th><th>TENKAN</th><th>TENSHI</th><th>PIVOT</th></tr><tr>${rows}</tr></table>
+        <div class="tree-tech-meta">Ki: <span>${kiLabel}</span> · EXP: <span>+${m.expGain}</span></div>
+        <div class="tree-tech-meta">Mejor entrada: <span>${bestSabaki.name}</span></div>
+        <table class="compat-table">
+          <tr><th>IRIMI</th><th>TENKAN</th><th>TENSHI</th><th>PIVOT</th></tr>
+          <tr>${sabakiRows}</tr>
+        </table>
         <div class="tree-tech-badge ${u?'u':'l'}">${u?'✓ Desbloqueada':'🔒 Req. '+belt.kyu+'º Kyu'}</div>
       </div>`;
     }).join('')}</div>`;
@@ -930,6 +1018,80 @@ function showTree(){
   document.getElementById('tree-overlay').classList.add('show');
 }
 function closeTree(){document.getElementById('tree-overlay').classList.remove('show');}
+
+// ══════════════════════════════════════════════════════
+// LOADOUT EDITOR
+// ══════════════════════════════════════════════════════
+let pendingLoadout=[];
+function showLoadout(){
+  pendingLoadout=[...activeLoadout];
+  const grid=document.getElementById('loadout-grid');
+  grid.innerHTML='';
+  getUnlockedKeys().forEach(key=>{
+    const m=ALL_MOVES[key];
+    const sel=pendingLoadout.includes(key);
+    const div=document.createElement('div');
+    div.className='lc-choice'+(sel?' lc-selected':'');
+    div.dataset.key=key;
+    div.onclick=()=>toggleLC(key);
+    div.innerHTML=`<div class="lc-name">${m.name}</div>
+      <div class="lc-desc">${m.desc}</div>
+      <div class="lc-status">${sel?'✓ Activa':'○ Inactiva'}</div>`;
+    grid.appendChild(div);
+  });
+  updateLCCount();
+  document.getElementById('loadout-overlay').classList.add('show');
+}
+function toggleLC(key){
+  if(pendingLoadout.includes(key)){
+    pendingLoadout=pendingLoadout.filter(k=>k!==key);
+  }else if(pendingLoadout.length<4){
+    pendingLoadout.push(key);
+  }
+  document.querySelectorAll('#loadout-grid .lc-choice').forEach(el=>{
+    const k=el.dataset.key,sel=pendingLoadout.includes(k);
+    el.classList.toggle('lc-selected',sel);
+    el.querySelector('.lc-status').textContent=sel?'✓ Activa':'○ Inactiva';
+  });
+  updateLCCount();
+}
+function updateLCCount(){
+  const n=pendingLoadout.length;
+  document.getElementById('loadout-count').textContent=n;
+  document.getElementById('loadout-confirm-btn').disabled=n!==4;
+}
+function confirmLoadout(){
+  if(pendingLoadout.length!==4)return;
+  activeLoadout=[...pendingLoadout];
+  saveGame();closeLoadout();
+  if(phase==='technique')renderPanel();
+}
+function closeLoadout(){document.getElementById('loadout-overlay').classList.remove('show');}
+
+// ══════════════════════════════════════════════════════
+// HELP
+// ══════════════════════════════════════════════════════
+function showHelp(){document.getElementById('help-overlay').classList.add('show');}
+function closeHelp(){document.getElementById('help-overlay').classList.remove('show');}
+
+// ══════════════════════════════════════════════════════
+// CUSTOM CONFIRM  (native confirm() is blocked in cross-origin iframes)
+// ══════════════════════════════════════════════════════
+let _confirmCb=null;
+function customConfirm(msg,onYes){
+  document.getElementById('confirm-msg').textContent=msg;
+  _confirmCb=onYes;
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+function confirmYes(){
+  document.getElementById('confirm-overlay').classList.remove('show');
+  if(_confirmCb)_confirmCb();
+  _confirmCb=null;
+}
+function confirmNo(){
+  document.getElementById('confirm-overlay').classList.remove('show');
+  _confirmCb=null;
+}
 
 // ══════════════════════════════════════════════════════
 // START / RESET
@@ -942,80 +1104,63 @@ function startNewCombat(){
   document.getElementById('sabaki-chosen').classList.remove('show');
   resetCombatState();updateBaseUI();renderPanel();
   phase='waiting';qRunning=false;
-  enq({
-    text:`¡Combate comienza! ${ENEMY.name} te desafía.`,
-    snap:snap(),
-    cb:()=>beginPlayerTurn()
-  });
+  enq({text:`¡Combate comienza! ${ENEMY.name} te desafía.`,snap:snap(),cb:()=>beginPlayerTurn()});
   flush();
 }
 
 // ══════════════════════════════════════════════════════
-// BETA TESTER PANEL
+// DEV PANEL  (hidden from UI — press F2 to open)
 // ══════════════════════════════════════════════════════
 function betaPanel(){
   document.getElementById('beta-overlay').classList.add('show');
-  document.getElementById('storage-status').textContent=HAS_STORAGE?'💾 localStorage: activo':'⚠ localStorage: no disponible (sandbox)';
-  document.getElementById('storage-status').style.color=HAS_STORAGE?'var(--ki)':'var(--accent)';
+  const el=document.getElementById('storage-status');
+  el.textContent=HAS_STORAGE?'💾 localStorage: activo':'⚠ localStorage: no disponible';
+  el.style.color=HAS_STORAGE?'var(--ki)':'var(--accent)';
 }
 function closeBetaPanel(){document.getElementById('beta-overlay').classList.remove('show');}
-
 function betaAddExp(){
   closeBetaPanel();
   const bu=gainExp(50);updateBeltUI();
   if(bu){showBeltUp(false);return;}
-  // Show feedback in log
   const prev=phase;phase='waiting';qRunning=false;
-  enq({text:`[BETA] +50 EXP añadidos. Total: ${PROGRESS.exp} / ${getCurrentBelt().exp}`,dim:true,cb:()=>{phase=prev;renderPanel();}});
+  enq({text:`[DEV] +50 EXP. Total: ${PROGRESS.exp} / ${getCurrentBelt().exp}`,dim:true,
+    cb:()=>{phase=prev;renderPanel();}});
   flush();
 }
-
 function betaNextBelt(){
   closeBetaPanel();
   if(PROGRESS.beltIndex>=BELTS.length-1){
     const prev=phase;phase='waiting';qRunning=false;
-    enq({text:'[BETA] Ya estás en el cinturón máximo.',dim:true,cb:()=>{phase=prev;renderPanel();}});
+    enq({text:'[DEV] Ya estás en el cinturón máximo.',dim:true,cb:()=>{phase=prev;renderPanel();}});
     flush();return;
   }
-  PROGRESS={beltIndex:PROGRESS.beltIndex+1,exp:0,totalExp:PROGRESS.totalExp};
+  PROGRESS={...PROGRESS,beltIndex:PROGRESS.beltIndex+1,exp:0};
   saveGame();updateBeltUI();showBeltUp(false);
 }
-
 function betaResetAll(){
-  if(!confirm('¿Resetear TODO a cero?\n· Cinturón → 7º KYU Blanco\n· EXP → 0\n· Oponente → KENZAN\n· Técnicas → inicio'))return;
-
-  // Stop everything running
-  if(typingTimer){clearTimeout(typingTimer);typingTimer=null;}
-  msgQueue=[];pendingConfirm=null;waitingConfirm=false;skipTyping=false;qRunning=false;
-  pendingBeltUp=false;beltUpFromVictory=false;
-
-  // Replace PROGRESS with a brand new object
-  PROGRESS={beltIndex:0,exp:0,totalExp:0};
-  activeLoadout=['ikkyo','kokyu','ki_charge','kote'];
-
-  // Clear storage then start fresh
-  clearSave().then(()=>{
-    ['overlay','beltup-overlay','tree-overlay','beta-overlay'].forEach(id=>
-      document.getElementById(id).classList.remove('show')
-    );
-    startNewCombat();
-  });
+  closeBetaPanel();
+  customConfirm(
+    '¿Resetear TODO a cero?\n· Cinturón → 7º KYU Blanco\n· EXP → 0\n· Récord → 0 V / 0 D',
+    ()=>{
+      if(typingTimer){clearTimeout(typingTimer);typingTimer=null;}
+      msgQueue=[];pendingConfirm=null;waitingConfirm=false;skipTyping=false;qRunning=false;
+      pendingBeltUp=false;beltUpFromVictory=false;
+      PROGRESS={beltIndex:0,exp:0,totalExp:0,wins:0,losses:0};
+      activeLoadout=['ikkyo','kokyu','ki_charge','kote'];
+      clearSave();
+      ['overlay','beltup-overlay','tree-overlay','beta-overlay','loadout-overlay','help-overlay']
+        .forEach(id=>document.getElementById(id).classList.remove('show'));
+      startNewCombat();
+    }
+  );
 }
-
-function showHelp(){
-  if(phase==='waiting'&&qRunning)return;
-  const prev=phase;phase='waiting';qRunning=false;
-  enq({
-    text:'Cada turno: 1) El enemigo anuncia su ataque. 2) Elige TAI SABAKI (entrada). 3) Elige la técnica — el símbolo ◎✦○✗ indica la compatibilidad. Si fallas (✗) hay % de fallo y no gastas Ki. Ki Focus siempre funciona. El progreso se guarda automáticamente.',
-    cb:()=>{phase=prev;renderPanel();}
-  });
-  flush();
-}
+document.addEventListener('keydown',e=>{if(e.key==='F2'){e.preventDefault();betaPanel();}});
 
 // ══════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════
-loadGame().then(()=>startNewCombat());
+loadGame();
+startNewCombat();
 </script>
 </body>
 </html>
